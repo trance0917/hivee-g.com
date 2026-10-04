@@ -7,13 +7,31 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@laravel/echo-react": "^2.5.0",
         "@tailwindcss/vite": "^4.0.0",
+        "@types/maplibre-gl": "^1.13.2",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.5",
+        "@vitejs/plugin-react": "^6.1.1",
         "concurrently": "^10.0.3",
+        "laravel-echo": "^2.5.0",
         "laravel-vite-plugin": "^3.1",
+        "mysql2": "^3.24.4",
+        "pusher-js": "^8.6.0",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "@tanstack/react-query": "^5.102.8",
+        "@tanstack/react-query-devtools": "^5.104.0",
+        "axios": "^1.20.0",
+        "h3-js": "^4.5.0",
+        "maplibre-gl": "^6.7.0",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "react-router-dom": "^7.18.3"
     }
 }
