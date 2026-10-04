@@ -1,24 +1,44 @@
-import { defineConfig } from 'vite';
+import {defineConfig} from 'vite';
 import laravel from 'laravel-vite-plugin';
-import { bunny } from 'laravel-vite-plugin/fonts';
+import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
+import fs from 'fs';
 
+// お使いのドメインに合わせて設定
+const domain = 'local.hivee-g.com';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/js/main.tsx'],
             refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
-                }),
-            ],
         }),
+        react(),
         tailwindcss(),
     ],
+    // ↓ これを追加するだけ！
+    optimizeDeps: {
+        exclude: ['maplibre-gl']
+    },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'resources/js'),
+        },
+    },
     server: {
+        host: true,
+        cors: true,
+        port: 4200, // ポートを変えたいなら 5200 などに変更
+        https: {
+            // 証明書のパスを環境に合わせて指定してね
+            key: fs.readFileSync(`/etc/letsencrypt/live/${domain}/privkey.pem`),
+            cert: fs.readFileSync(`/etc/letsencrypt/live/${domain}/cert.pem`),
+        },
+        hmr: {
+            host: domain, // これでブラウザ側が wss://hivee-g.com で繋ぎにいく
+        },
         watch: {
-            ignored: ['**/storage/framework/views/**'],
+            usePolling: false,
         },
     },
 });
