@@ -45,6 +45,14 @@ return [
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+            'permissions' => [
+                'file' => [
+                    'public' => 0777,  // ‚±‚±‚ð’Ç‰Á
+                ],
+                'dir' => [
+                    'public' => 0777,  // ‚±‚±‚ð’Ç‰Á
+                ],
+            ],
         ],
 
         's3' => [

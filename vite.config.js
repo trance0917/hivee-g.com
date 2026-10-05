@@ -28,7 +28,7 @@ export default defineConfig({
     server: {
         host: true,
         cors: true,
-        port: 4200, // ポートを変えたいなら 5200 などに変更
+        port: 5200, // ポートを変えたいなら 5200 などに変更
         https: {
             // 証明書のパスを環境に合わせて指定してね
             key: fs.readFileSync(`/etc/letsencrypt/live/${domain}/privkey.pem`),
