@@ -217,21 +217,21 @@ export default function Index() {
                                 </div>
                             </div>
 
-                            <div className="buttons flex flex-col items-center gap-[12px]">
+                            <div className="buttons flex flex-col items-center gap-[12px] text-[14px]">
                                 <button type="button" className="buttonFrame color-google ">
-                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration left" src="/assets/decoration-side-2.png" alt=""/>
                                     Googleでログイン
-                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration right" src="/assets/decoration-side-2.png" alt=""/>
                                 </button>
                                 <button type="button" className="buttonFrame color-x">
-                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration left" src="/assets/decoration-side-2.png" alt=""/>
                                     Xでログイン
-                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration right" src="/assets/decoration-side-2.png" alt=""/>
                                 </button>
                                 <button type="button" className="buttonFrame color-line">
-                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration left" src="/assets/decoration-side-2.png" alt=""/>
                                     LINEでログイン
-                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
+                                    <img className="decoration right" src="/assets/decoration-side-2.png" alt=""/>
                                 </button>
                             </div>
 
