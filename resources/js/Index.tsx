@@ -188,9 +188,15 @@ export default function Index() {
                         onClick={() => setIsOpen(false)}
                     >
                         <div
-                            className="relative w-full max-w-[540px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[40px] pb-[20px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
+                            className="relative w-full max-w-[540px] mb-[20px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[40px] pb-[30px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
                             onClick={(e) => e.stopPropagation()}
                         >
+
+                            <img className="absolute top-[-46px] w-[220px] left-1/2 -translate-x-1/2 " src="/assets/decoration-a-top.png?" alt=""/>
+                            <img className="absolute bottom-[-26px] w-[160px] left-1/2 -translate-x-1/2 " src="/assets/decoration-a-bottom.png" alt=""/>
+                            <img className="absolute top-[-30px] left-[-20px] w-[70px]" src="/assets/decoration-a-corner-br.png" alt=""/>
+                            <img className="absolute right-[-20px] bottom-[-30px] w-[70px]" src="/assets/decoration-a-corner-tl.png" alt=""/>
+
                             {/* 閉じるボタン */}
                             <button
                                 type="button"
