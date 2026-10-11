@@ -68,7 +68,7 @@ export default function Index() {
                     <div className="relative z-[6] flex h-[70px] items-center justify-center">
                         <div className="pointer-events-none absolute top-[26px] -inset-x-[14px] bottom-[10px] -z-10 blur-[6px] bg-[radial-gradient(ellipse,rgba(255,250,221,0.75),transparent_67%)]"
                             aria-hidden="true" />
-                        <img className="h-auto w-[300px] max-w-full drop-shadow-[0_6px_8px_rgba(74,57,33,0.18)]" src="/assets/index/logo.png" alt="HIVEX" />
+                        <img className="h-auto w-[240px] max-w-full" src="/assets/index/logo.png?1" alt="HIVEX" />
                     </div>
 
                     <div className="nav flex items-center justify-end gap-[28px]
@@ -95,7 +95,7 @@ export default function Index() {
                             {/* ヘッダーのログインボタンからも開けるように変更 */}
                             <button
                                 onClick={() => setIsOpen(true)}
-                                className="flex h-[34px] items-center gap-2 rounded-full border border-[rgba(173,139,79,0.48)] bg-white/43 px-[14px] text-xs tracking-[0.07em] text-[#665341] transition-transform hover:scale-105 active:scale-95"
+                                className="flex h-[34px] items-center gap-2 rounded-full border border-[rgba(173,139,79,0.48)] bg-white/43 px-[14px] text-xs tracking-[0.07em] text-[#665341] transition-transform hover:scale-103 active:scale-97"
                             >
                                 ◉ ログイン
                             </button>
@@ -110,10 +110,10 @@ export default function Index() {
                         aria-label="今すぐプレイ"
                         className="cursor-pointer border-none bg-transparent outline-none"
                     >
-                        <img className="w-[min(380px,31vw)] drop-shadow-[0_12px_20px_rgba(34,32,23,0.3)] transition-all duration-[250ms] ease
-                            hover:-translate-y-1 hover:scale-[1.025]
-                            hover:drop-shadow-[0_16px_26px_rgba(33,28,20,0.36)] active:scale-95"
-                             src="/assets/index/play.png"
+                        <img className="animate-glow w-[min(380px,31vw)] transition-all duration-[250ms] ease
+                            hover:-translate-y-1 hover:scale-[1.02]
+                            active:scale-97"
+                             src="/assets/index/play.png?"
                              alt="今すぐプレイ"
                         />
                     </button>
@@ -184,79 +184,56 @@ export default function Index() {
                 {/* ===== ログインモーダル ===== */}
                 {isOpen && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-[4px] animate-in fade-in duration-200"
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-white/25 backdrop-blur-[4px] animate-in fade-in duration-400"
                         onClick={() => setIsOpen(false)}
                     >
                         <div
-                            className="relative w-full max-w-[440px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,251,245,0.92)] to-[rgba(243,238,220,0.88)] p-7 pb-8 shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
+                            className="relative w-full max-w-[540px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[40px] pb-[20px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* 閉じるボタン */}
                             <button
                                 type="button"
                                 onClick={() => setIsOpen(false)}
-                                className="absolute right-5 top-5 flex size-8 items-center justify-center text-xl text-[#8e7a63] transition hover:scale-110 hover:text-[#524434]"
+                                className="absolute right-[20px] top-[20px] flex size-6 items-center justify-center text-xl text-[#8e7a63] transition hover:scale-110 hover:text-[#524434]"
                                 aria-label="閉じる"
                             >
                                 ✕
                             </button>
 
                             {/* モーダルヘッダー */}
-                            <div className="mb-6 mt-1 text-center">
-                                <h2 className="text-[26px] tracking-[0.06em] text-[#6d563d] font-bold">
-                                    hivee<span className="font-normal text-[22px] ml-1">へようこそ</span>
+                            <div className="mb-[24px]">
+                                <h2 className="flex justify-center">
+                                    <img className="h-auto w-[380px] max-w-full"
+                                         src="/assets/login-title.png"
+                                         alt=""
+                                    />
                                 </h2>
-                                <div className="mt-1 flex items-center justify-center gap-2 text-[12px] tracking-[0.08em] text-[#8e7960]">
-                                    <span>◇</span>
+                                <div
+                                    className="mt-[8px] flex items-center justify-center gap-[6px] text-[12px] tracking-[0.08em] text-[#8e7960]">
+                                    <span><img className="w-[60px] -scale-x-100" src="/assets/needle-1.png" alt=""/></span>
                                     <span>ログインして、精霊樹の成長をはじめよう</span>
-                                    <span>◇</span>
+                                    <span><img className="w-[60px]" src="/assets/needle-1.png" alt=""/></span>
                                 </div>
                             </div>
 
-                            {/* ログインボタン一覧 */}
-                            <div className="flex flex-col gap-3">
-                                {/* Google */}
-                                <button
-                                    type="button"
-                                    onClick={() => console.log("Google Login")}
-                                    className="group flex h-[52px] w-full items-center justify-between rounded-full border border-[rgba(214,188,142,0.75)] bg-gradient-to-r from-white/90 to-[#fdfaf2]/90 px-5 text-[14px] text-[#5c4936] shadow-sm transition hover:scale-[1.01] hover:border-[#bfa268] active:scale-[0.99]"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <svg className="size-5 shrink-0" viewBox="0 0 24 24">
-                                            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z" />
-                                            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.26v3.15C3.25 21.37 7.34 24 12 24Z" />
-                                            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.26C.46 8.16 0 9.98 0 12s.46 3.84 1.26 5.42l4.02-3.15Z" />
-                                            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.25 2.63 1.26 6.58l4.02 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" />
-                                        </svg>
-                                        <span className="font-medium tracking-[0.04em]">Googleでログイン</span>
-                                    </div>
-                                    <span className="text-[#a4917a] transition-transform group-hover:translate-x-0.5">›</span>
-                                </button>
 
-                                {/* X */}
-                                <button
-                                    type="button"
-                                    onClick={() => console.log("X Login")}
-                                    className="group flex h-[52px] w-full items-center justify-between rounded-full border border-[rgba(214,188,142,0.75)] bg-gradient-to-r from-white/90 to-[#fdfaf2]/90 px-5 text-[14px] text-[#5c4936] shadow-sm transition hover:scale-[1.01] hover:border-[#bfa268] active:scale-[0.99]"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex size-5 shrink-0 items-center justify-center font-bold text-black">𝕏</span>
-                                        <span className="font-medium tracking-[0.04em]">Xでログイン</span>
-                                    </div>
-                                    <span className="text-[#a4917a] transition-transform group-hover:translate-x-0.5">›</span>
-                                </button>
+                            <div className="buttons flex flex-col items-center gap-[12px]">
 
-                                {/* LINE */}
-                                <button
-                                    type="button"
-                                    onClick={() => console.log("LINE Login")}
-                                    className="group flex h-[52px] w-full items-center justify-between rounded-full border border-[rgba(163,205,152,0.85)] bg-gradient-to-r from-[#eff8ee]/95 to-[#e4f3e2]/95 px-5 text-[14px] text-[#3e5f39] shadow-sm transition hover:scale-[1.01] hover:border-[#7cb773] active:scale-[0.99]"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[#06c755] text-[10px] font-bold text-white">LINE</span>
-                                        <span className="font-medium tracking-[0.04em]">LINEでログイン</span>
-                                    </div>
-                                    <span className="text-[#7da779] transition-transform group-hover:translate-x-0.5">›</span>
+                                <button type="button" className="buttonFrame color-google ">
+                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    Googleでログイン
+                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
+                                </button>
+                                <button type="button" className="buttonFrame color-x">
+                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    Xでログイン
+                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
+                                </button>
+                                <button type="button" className="buttonFrame color-line">
+                                    <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
+                                    LINEでログイン
+                                    <img className="decoration right" src="/assets/decoration-middle-2.png" alt=""/>
                                 </button>
                             </div>
 
@@ -265,7 +242,8 @@ export default function Index() {
                                 <p className="text-[11px] leading-[1.6] text-[#867563]">
                                     ログインすることで
                                     <a href="#" className="underline hover:text-[#4d3d2e] mx-0.5">利用規約</a>・
-                                    <a href="#" className="underline hover:text-[#4d3d2e] mx-0.5">プライバシーポリシー</a>
+                                    <a href="#"
+                                       className="underline hover:text-[#4d3d2e] mx-0.5">プライバシーポリシー</a>
                                     に同意したものとみなされます。
                                 </p>
                             </div>

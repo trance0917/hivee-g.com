@@ -19,6 +19,7 @@
         "mysql2": "^3.24.4",
         "pusher-js": "^8.6.0",
         "tailwindcss": "^4.0.0",
+        "tailwindcss-animate": "^1.0.7",
         "vite": "^8.0.0"
     },
     "optionalDependencies": {
