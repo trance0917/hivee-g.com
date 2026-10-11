@@ -217,9 +217,7 @@ export default function Index() {
                                 </div>
                             </div>
 
-
                             <div className="buttons flex flex-col items-center gap-[12px]">
-
                                 <button type="button" className="buttonFrame color-google ">
                                     <img className="decoration left" src="/assets/decoration-middle-2.png" alt=""/>
                                     Googleでログイン
