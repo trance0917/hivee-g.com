@@ -50,21 +50,21 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </div>
 
                 <div className="buttons flex flex-col items-center gap-[12px] text-[14px]">
-                    <button type="button" className="buttonFrame color-google ">
+                    <a href="login/google" className="buttonFrame color-google">
                         <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
                         Googleでログイン
                         <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
-                    </button>
-                    <button type="button" className="buttonFrame color-x">
+                    </a>
+                    <a href="login/twitter" className="buttonFrame color-x">
                         <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
                         Xでログイン
                         <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
-                    </button>
-                    <button type="button" className="buttonFrame color-line">
+                    </a>
+                    <a href="login/line" type="button" className="buttonFrame color-line">
                         <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
                         LINEでログイン
                         <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
-                    </button>
+                    </a>
                 </div>
 
                 {/* フッター規約案内 */}

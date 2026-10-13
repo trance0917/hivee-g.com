@@ -59,4 +59,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function user_social_accounts()
+    {
+        return $this->hasMany(UserSocialAccount::class);
+    }
 }
