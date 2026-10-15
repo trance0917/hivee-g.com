@@ -11,6 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $neighbor_hex_id
  * @property-read Village $village
  * @property-read Village $neighborVillage
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor whereHexId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|VillageNeighbor whereNeighborHexId($value)
+ * @mixin \Eloquent
  */
 class VillageNeighbor extends Model
 {

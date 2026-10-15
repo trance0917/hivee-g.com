@@ -40,6 +40,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereValue($value)
+ * @property \Illuminate\Support\Carbon|null $read_at 既読日時（nullなら未読）
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Notification whereReadAt($value)
  * @mixin \Eloquent
  */
 class Notification extends Model

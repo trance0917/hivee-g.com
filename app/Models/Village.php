@@ -23,7 +23,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Terrain $terrain
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village query()
@@ -39,7 +38,12 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village wherePoints($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village whereTerrainCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Village whereUpdatedAt($value)
- *
+ * @property int|null $prefecture_id
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Village> $adjacentVillages
+ * @property-read int|null $adjacent_villages_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\VillageNeighbor> $neighbors
+ * @property-read int|null $neighbors_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Village wherePrefectureId($value)
  * @mixin \Eloquent
  */
 class Village extends Model

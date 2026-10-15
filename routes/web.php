@@ -17,7 +17,7 @@ Route::get('login/google', function () {
 })->name('login.google');
 Route::get('login/twitter', function () {
     session(['url.intended' => url()->previous()]);
-    return Socialite::driver('twitter')->redirect();
+    return Socialite::driver('twitter-oauth-2')->redirect();
 })->name('login.twitter');
 Route::get('login/line', function () {
     session(['url.intended' => url()->previous()]);
@@ -31,7 +31,7 @@ Route::get('login/tiktok', function () {
 Route::get('login/google/callback', [\App\Http\Controllers\LoginController::class, 'loginCallback'])
     ->defaults('sns_auth_type', 'google');
 Route::get('login/twitter/callback', [\App\Http\Controllers\LoginController::class, 'loginCallback'])
-    ->defaults('sns_auth_type', 'twitter');
+    ->defaults('sns_auth_type', 'twitter-oauth-2');
 Route::get('login/line/callback', [\App\Http\Controllers\LoginController::class, 'loginCallback'])
     ->defaults('sns_auth_type', 'line');
 

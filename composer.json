@@ -14,7 +14,7 @@
         "firebase/php-jwt": "^7.2",
         "google/apiclient": "^2.20",
         "google/auth": "^1.55",
-        "intervention/image": "^4.3",
+        "intervention/image": "^4.0",
         "laravel/framework": "^13.17",
         "laravel/horizon": "^5.48",
         "laravel/reverb": "^1.12",

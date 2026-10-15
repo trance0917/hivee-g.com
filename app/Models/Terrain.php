@@ -19,7 +19,6 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property-read Collection<int, Village> $villages
  * @property-read int|null $villages_count
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain query()
@@ -31,7 +30,9 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain whereMovementCost($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain whereUpdatedAt($value)
- *
+ * @property string $color
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Terrain whereSortOrder($value)
  * @mixin \Eloquent
  */
 class Terrain extends Model
