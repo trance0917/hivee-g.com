@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Terrain;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class InitialDataController extends Controller
@@ -13,6 +14,8 @@ class InitialDataController extends Controller
      */
     public function __invoke(Request $request)
     {
+        $user = User::select(['id', ''])->find($request->user()?->id());
+
         return response()->json([
             'user' => $request->user()?->makeHidden('email'),
         ]);
