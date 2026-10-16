@@ -11,3 +11,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+Route::get('/initial-data', InitialDataController::class);
+
+
