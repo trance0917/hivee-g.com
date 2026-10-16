@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
@@ -28,20 +27,9 @@ final class LoginController extends Controller
     {
         $driver = request()->route('sns_auth_type');
 
-        // ★修正: stateパラメータが 'mobile_app_' で始まっているかチェック
-        $state = $request->input('state', '');
-        $is_ios_app = str_starts_with($state, 'mobile_app_');
-
-        if ($driver === 'tiktok' && $request->has('code') && $is_ios_app) {
-            $code = $request->input('code');
-            // アプリからのアクセスの場合のみ、アプリへ戻す
-            return redirect("koibana://auth_callback?code={$code}");
-        }
-
         $user = null;
         $is_first_time = false;
         try {
-            $driver = request()->route('sns_auth_type');
             $social_user = Socialite::driver($driver)->user();
             // メールアドレスが空の場合リダイレクト
 //            if (empty($social_user->email)) {
@@ -56,7 +44,6 @@ final class LoginController extends Controller
             $user_social_account = UserSocialAccount::where('provider', $driver)
                 ->whereHas('user')
                 ->where('provider_id', $social_user->id)->first();
-
             // 既にアカウントがある場合
             if ($user_social_account) {
                 $user = $user_social_account->user;
@@ -87,14 +74,16 @@ final class LoginController extends Controller
                             report($e);
                         }
                     }
-
                     // サムネイル画像の自動登録処理
                     if ($social_user->avatar) {
-                        UserService::saveSocialAvatar($user, $social_user->avatar);
+                        $url = $social_user->avatar;
+                        if ($driver == 'google') {
+                            $url = preg_replace('/=s\d+(-c)?$/', '=s400-c', $url);
+                        } else if ($driver == 'twitter-oauth-2') {
+                            $url = str_replace('_normal', '_400x400', $url);
+                        }
+                        UserService::saveSocialAvatar($user, $url);
                     }
-
-                    // 新規登録の時のみゲスト回答を紐付ける
-                    $this->linkGuestData($user);
                 }
 
                 // ソーシャルアカウント紐づけ作成
@@ -114,45 +103,5 @@ final class LoginController extends Controller
         $user->save();
 
         return redirect()->intended('/')->with('is_first_time', $is_first_time);
-    }
-
-    /**
-     * クッキーに残っているゲスト回答をログインユーザーに紐付ける
-     */
-    private function linkGuestData(User $user)
-    {
-        // クッキーからゲスト回答情報を取得
-        $guest_answers = json_decode(request()->cookie('guest_answers', '{}'), true);
-
-        if (!empty($guest_answers) && is_array($guest_answers)) {
-            // 値（answer_id）のリストを取得
-            $answer_ids = array_values($guest_answers);
-
-            // 該当する回答で、かつ user_id が NULL (未紐付け) のものを取得
-            $answers = Answer::whereIn('id', $answer_ids)
-                ->whereNull('user_id')
-                ->with('comment') // N+1対策
-                ->get();
-
-            if ($answers->isNotEmpty()) {
-                foreach ($answers as $answer) {
-                    // Answerの更新
-                    $answer->user_id = $user->id;
-                    $answer->save();
-
-                    // 紐づく Comment の更新
-                    if ($answer->comment) {
-                        $answer->comment->user_id = $user->id;
-                        $answer->comment->save();
-                    }
-
-                    // ユーザーの回答数を加算
-                    $user->increment('answers_count');
-                }
-            }
-
-            // 紐付けが終わったのでクッキーを削除する
-            Cookie::queue(Cookie::forget('guest_answers'));
-        }
     }
 }

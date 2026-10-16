@@ -13,10 +13,8 @@ class InitialDataController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $terrains = Terrain::orderBy('sort_order', 'asc')->get();
-
         return response()->json([
-            'terrains' => $terrains,
+            'user' => $request->user()?->makeHidden('email'),
         ]);
     }
 }

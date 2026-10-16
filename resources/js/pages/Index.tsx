@@ -1,11 +1,13 @@
 import {useEffect, useRef, useState} from 'react';
 import Header from "@/components/Header";
 import { useLoginModal } from "@/contexts/LoginModalContext";
+import {useUser, useInitialData} from '@/hooks/useInitialData';
 
 export default function Index() {
     const { openLoginModal } = useLoginModal();
     const [isOpen, setIsOpen] = useState(false);
-
+    const {user} = useUser();
+    const {data, ...rest} = useInitialData();
     return (
         <>
             <style>{`

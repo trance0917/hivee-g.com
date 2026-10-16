@@ -13,11 +13,11 @@ return new class extends Migration
             $table->string('text_id')->nullable()->unique()->comment('公開ID（文字列）')->after('name');
 
             // avatar: email の前に追加
-            $table->string('avatar')->nullable()->comment('アバター画像のパス')->before('email');
+            $table->string('avatar')->nullable()->comment('アバター画像のパス')->after('email');
 
             // SNS連携ID: remember_token の前に追加
-            $table->string('x_id', 50)->nullable()->comment('X(旧Twitter)のID')->before('remember_token');
-            $table->string('instagram_id', 50)->nullable()->comment('InstagramのID')->before('remember_token');
+            $table->string('x_id', 50)->nullable()->comment('X(旧Twitter)のID')->after('avatar');
+            $table->string('instagram_id', 50)->nullable()->comment('InstagramのID')->after('x_id');
 
             // api_token: パスワードの後ろに追加（ユニーク制約をつけておくのが実務では一般的）
             $table->string('api_token', 80)->nullable()->unique()->comment('API用トークン')->after('password');

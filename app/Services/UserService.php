@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Format;
 
 class UserService{
     public static function createAccount($social_user): User
@@ -45,22 +46,19 @@ class UserService{
             // ファイル名生成
             $file_name = 'avatar-' . Str::random(12) . '.png';
 
-            // Intervention Image v3 で処理
-            $manager = new ImageManager(new Driver());
-            $image = $manager->decode($file_contents);
+            // 1. v4のインスタンス生成
+            $manager = ImageManager::usingDriver(Driver::class);
 
-            // リサイズ処理 (UserControllerと同じロジック)
-            $width = $image->width();
-            $height = $image->height();
-            if ($width > 200 || $height > 200) {
-                $image->resize(200, 200);
-            }
+            // 2. バイナリデータを直接デコード
+            $image = $manager->decodeBinary($file_contents);
 
-            // Storageに保存 (/users/{id}/filename)
-            // ユーザーIDごとのディレクトリがないと困るので ensureDirectoryExists は Storage::put が自動でやるはずですが、パス構成は合わせます
+            // 3. アバターのリサイズ（比率維持で切り抜き）
+            $image->cover(240, 240);
+
+            // 4. v4のFormat enumを使ってエンコードし、Storageに保存
             Storage::disk('public')->put(
-                '/users/' . $user->id . '/' . $file_name,
-                $image->encode(new PngEncoder()),
+                'users/' . $user->id . '/' . $file_name,
+                (string) $image->encodeUsingFormat(Format::PNG),
                 'public'
             );
 
@@ -69,7 +67,6 @@ class UserService{
             $user->save();
 
         } catch (\Exception $e) {
-            // 画像保存に失敗してもログイン自体は止めないようにログだけ吐く
             Log::error('SNSアバター保存失敗: ' . $e->getMessage());
         }
     }

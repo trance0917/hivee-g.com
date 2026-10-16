@@ -50,8 +50,14 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SelectAccessorTrait, SoftDeletes;
 
-//noticifationもbootかなにかでread_atにはいるようにする
+    //noticifationもbootかなにかでread_atにはいるようにする
     protected $guarded = [];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'api_token',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -82,4 +88,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserSocialAccount::class);
     }
+
+
+
 }

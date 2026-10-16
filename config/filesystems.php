@@ -41,16 +41,16 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
             'permissions' => [
                 'file' => [
-                    'public' => 0777,  // ‚±‚±‚ð’Ç‰Á
+                    'public' => 0777,  // ã“ã“ã‚’è¿½åŠ 
                 ],
                 'dir' => [
-                    'public' => 0777,  // ‚±‚±‚ð’Ç‰Á
+                    'public' => 0777,  // ã“ã“ã‚’è¿½åŠ 
                 ],
             ],
         ],

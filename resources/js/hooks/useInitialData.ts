@@ -1,16 +1,12 @@
 import {useQuery} from '@tanstack/react-query';
 
 //型エイリアス
-export type Terrain = {
-    code: string,
-    name: string,
-    can_pass?: boolean, // 任意
-    is_developable?: boolean, // 任意
+export type User = {
     [key: string]: any //キーが任意のstring型
 };
 
 type InitialDataResponse = {
-    terrains: Terrain[]
+    user: User,
 };
 
 export const useInitialData = () => {
@@ -28,10 +24,10 @@ export const useInitialData = () => {
 };
 
 // terrains だけをサクッと取り出したい時用のヘルパーフック
-export const useTerrains = () => {
+export const useUser = () => {
     const {data, ...rest} = useInitialData();
     return {
-        terrains: data?.terrains ?? [],
+        user: data?.user ?? [],
         ...rest,
     };
 };

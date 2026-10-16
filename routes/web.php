@@ -23,10 +23,7 @@ Route::get('login/line', function () {
     session(['url.intended' => url()->previous()]);
     return Socialite::driver('line')->redirect();
 })->name('login.line');
-Route::get('login/tiktok', function () {
-    session(['url.intended' => url()->previous()]);
-    return Socialite::driver('tiktok')->redirect();
-})->name('login.tiktok');
+
 
 Route::get('login/google/callback', [\App\Http\Controllers\LoginController::class, 'loginCallback'])
     ->defaults('sns_auth_type', 'google');
