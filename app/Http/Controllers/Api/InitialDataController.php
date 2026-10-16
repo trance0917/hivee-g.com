@@ -14,10 +14,13 @@ class InitialDataController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $user = User::select(['id', ''])->find($request->user()?->id());
+        $user = User::select(['id', 'name', 'avatar'])
+            ->selectAccessor(['avatar_url'])
+            ->find($request->user()?->id)
+            ->makeHidden(['avatar']);
 
         return response()->json([
-            'user' => $request->user()?->makeHidden('email'),
+            'user' => $user,
         ]);
     }
 }
