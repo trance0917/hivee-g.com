@@ -1,6 +1,6 @@
-import { useLoginModal } from "@/contexts/LoginModalContext";
+import { useLoginModalStore } from "@/stores/useLoginModalStore";
 export default function Header() {
-    const { openLoginModal } = useLoginModal();
+    const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
     return (
         <header className="absolute top-[14px] inset-x-[2.8%] h-[76px] z-[5]
                     grid grid-cols-[1fr_320px_1fr] items-center px-[18px]

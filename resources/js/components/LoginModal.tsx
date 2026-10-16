@@ -1,17 +1,16 @@
 // LoginModal.tsx
+import { useLoginModalStore } from "@/stores/useLoginModalStore";
 
-interface LoginModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+export default function LoginModal() {
+    const isOpen = useLoginModalStore((state) => state.isOpen);
+    const closeLoginModal = useLoginModalStore((state) => state.closeLoginModal);
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     if (!isOpen) return null;
 
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-white/25 backdrop-blur-[4px] animate-in fade-in duration-400"
-            onClick={onClose}
+            onClick={closeLoginModal}
         >
             <div
                 className="relative w-full max-w-[540px] mb-[20px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[50px] pb-[35px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
@@ -26,7 +25,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 {/* 閉じるボタン */}
                 <button
                     type="button"
-                    onClick={onClose}
+                    onClick={closeLoginModal}
                     className="absolute right-[20px] top-[20px] flex size-6 items-center justify-center text-xl text-[#8e7a63] transition hover:scale-110 hover:text-[#524434]"
                     aria-label="閉じる"
                 >

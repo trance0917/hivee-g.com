@@ -1,10 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 import Header from "@/components/Header";
-import { useLoginModal } from "@/contexts/LoginModalContext";
+import { useLoginModalStore } from "@/stores/useLoginModalStore";
 import {useUser, useInitialData} from '@/hooks/useInitialData';
 
 export default function Index() {
-    const { openLoginModal } = useLoginModal();
+    const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
     const [isOpen, setIsOpen] = useState(false);
     const {user} = useUser();
     const {data, ...rest} = useInitialData();
