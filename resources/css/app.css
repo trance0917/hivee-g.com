@@ -59,3 +59,13 @@
 .animate-glow {
     animation: glow-pulse 3s ease-in-out infinite;
 }
+
+
+@keyframes pulse-brightness {
+    0%, 100% {
+        filter: brightness(0.9);
+    }
+    50% {
+        filter: brightness(1.2); /* 好みの明るさに調整（1.2〜1.4くらいが上品） */
+    }
+}

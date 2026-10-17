@@ -40,7 +40,7 @@ export default function Index() {
           `}</style>
 
             <div className="relative min-h-screen isolate overflow-hidden">
-                <div className="bg-[url(/assets/index/background.png)] absolute inset-0 bg-cover bg-[center_50%] saturate-[1.0]"
+                <div className="absolute inset-0 bg-cover bg-[center_50%] saturate-[1.0] animate-[pulse-brightness_4s_ease-in-out_infinite]"
                      style={{
                          backgroundImage: "url('/assets/images/index/background.png')",
                      }}
@@ -158,8 +158,6 @@ export default function Index() {
                             ゲームワールドカレンダーを表示 →
                         </div>
 
-                        {/* 下部のひし形飾り */}
-                        <span className="absolute -bottom-[9px] left-1/2 size-[18px] -translate-x-1/2 rotate-45 border border-[#d5b275] bg-[#fffaf0] shadow-[0_0_0_3px_rgba(255,255,255,0.22)]" />
                     </article>
                 </section>
                 <div
