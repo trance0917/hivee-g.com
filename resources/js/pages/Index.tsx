@@ -1,13 +1,27 @@
 import {useEffect, useRef, useState} from 'react';
+import {Link, useNavigate} from 'react-router-dom';
 import Header from "@/components/Header";
 import { useLoginModalStore } from "@/stores/useLoginModalStore";
-import {useUser, useInitialData} from '@/hooks/useInitialData';
+import { useUser } from "@/stores/useInitialDataStore";
 
 export default function Index() {
     const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
-    const [isOpen, setIsOpen] = useState(false);
-    const {user} = useUser();
-    const {data, ...rest} = useInitialData();
+    const user = useUser();
+    const navigate = useNavigate();
+    const [isLeaving, setIsLeaving] = useState(false);
+    const handleWorldClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+
+        if (isLeaving) return;
+
+        setIsLeaving(true);
+
+        // アニメーション完了後に遷移
+        setTimeout(() => {
+            navigate("/world");
+        }, 700);
+    };
+
     return (
         <>
             <style>{`
@@ -28,32 +42,64 @@ export default function Index() {
             <div className="relative min-h-screen isolate overflow-hidden">
                 <div className="bg-[url(/assets/index/background.png)] absolute inset-0 bg-cover bg-[center_50%] saturate-[1.0]"
                      style={{
-                         backgroundImage: "url('/assets/index/background.png')",
+                         backgroundImage: "url('/assets/images/index/background.png')",
                      }}
                 />
                 {/* 外枠のビネット */}
                 <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_90px_rgba(11,25,25,0.24)]" />
 
-                <Header />
+                <div
+                    className={`relative z-[10] transition-transform duration-700 ease-in-out
+        ${isLeaving ? "-translate-y-[150px]" : "translate-y-0"}
+    `}
+                >
+                    <Header />
+                </div>
 
-                <main className="absolute inset-0 z-[2] flex items-end justify-center pb-[5.4vh]">
-                    <button
-                        type="button"
-                        onClick={openLoginModal}
-                        aria-label="今すぐプレイ"
-                        className="cursor-pointer border-none bg-transparent outline-none"
-                    >
-                        <img className="animate-glow w-[min(380px,31vw)] transition-all duration-[250ms] ease
+                <main className="absolute inset-0 z-[2] flex items-center justify-center pb-[30px]">
+                    {user ? (
+                        <Link to="/world"
+                              onClick={handleWorldClick}
+                              className={`cursor-pointer border-none bg-transparent outline-none
+                                  transition-all duration-700 ease-in-out
+                                  hover:brightness-115
+                                  ${isLeaving
+                                      ? "scale-125 brightness-200 blur opacity-0"
+                                      : ""
+                              }`}>
+                            <img className="animate-glow w-[min(380px,31vw)] transition-all duration-[250ms] ease
                             hover:-translate-y-1 hover:scale-[1.02]
                             active:scale-97"
-                             src="/assets/index/play.png?"
-                             alt="今すぐプレイ"
-                        />
-                    </button>
+                                 src="/assets/images/index/to-world.png"
+                                 alt="ワールドへ"
+                            />
+                        </Link>
+
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={openLoginModal}
+                            aria-label="今すぐプレイ"
+                            className="cursor-pointer border-none bg-transparent outline-none"
+                        >
+                            <img className="animate-glow w-[min(380px,31vw)] transition-all duration-[250ms] ease
+                            hover:-translate-y-1 hover:scale-[1.02]
+                            active:scale-97"
+                                 src="/assets/images/index/play.png"
+                                 alt="今すぐプレイ"
+                            />
+                        </button>
+                    )}
                 </main>
 
+
+
                 <section className="pointer-events-none absolute inset-x-[3.2%] bottom-[4vh] z-[4] grid grid-cols-[minmax(330px,390px)_1fr_minmax(330px,390px)] items-end gap-7 [&>*]:pointer-events-auto">
-                    <article className="relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)] before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']">
+                    <article className={`relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)]
+                        before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']
+                        transition-all duration-700 delay-100
+                        ${isLeaving ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
+                        `}>
                         <div className="flex items-center justify-between px-5 pb-2.5 pt-[18px] text-[14px] tracking-[0.08em]">
                             <strong>最新情報</strong>
                             <span className="text-[11px] text-[#8d795f]">もっと見る →</span>
@@ -63,7 +109,7 @@ export default function Index() {
                         <div className="grid grid-cols-[104px_1fr] items-center gap-[14px] px-5 pb-4.5 pt-1">
                             <img
                                 className="h-[70px] w-[104px] rounded-[10px] border border-[rgba(201,173,121,0.55)] object-cover"
-                                src="/assets/index/background.png"
+                                src="/assets/images/index/background.png"
                                 alt="ニュースサムネイル"
                             />
                             <div>
@@ -83,10 +129,14 @@ export default function Index() {
                     </article>
 
                     {/* 中央の余白（ヒーローの再生ボタン用） */}
-                    <div />
+
 
                     {/* ===== 右：公式コミュニティカード ===== */}
-                    <article className="relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)] before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']">
+                    <article className={`relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)]
+                        before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']
+                        transition-all duration-700
+                        ${isLeaving ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
+                        `}>
                         {/* ヘッダー */}
                         <div className="flex items-center justify-between px-5 pb-2.5 pt-[18px] text-[14px] tracking-[0.08em]">
                             <strong className="font-semibold">公式コミュニティ</strong>
@@ -112,7 +162,13 @@ export default function Index() {
                         <span className="absolute -bottom-[9px] left-1/2 size-[18px] -translate-x-1/2 rotate-45 border border-[#d5b275] bg-[#fffaf0] shadow-[0_0_0_3px_rgba(255,255,255,0.22)]" />
                     </article>
                 </section>
-
+                <div
+                    className={`
+            fixed inset-0 z-[9999] pointer-events-none
+            bg-[#fffaf0] transition duration-700
+            ${isLeaving ? "opacity-100" : "opacity-0"}
+        `}
+                />
             </div>
         </>
     );

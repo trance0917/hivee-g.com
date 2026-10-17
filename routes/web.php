@@ -34,25 +34,20 @@ Route::get('login/line/callback', [\App\Http\Controllers\LoginController::class,
 
 Route::get('logout', function () {
     $user = auth()->user();
-//    \Log::info($user->toArray());
     if ($user) {
         // 1. Cookieからトークン文字列を取得
         $token = request()->cookie('app_auth_token');
-//        \Log::info($token);
         if ($token) {
             // 2. DBからそのトークンを探して削除（物理削除）
             $access_token = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-//            \Log::info($access_token->toArray());
             if ($access_token) {
                 $access_token->delete();
             }
         }
-
         $user->api_token = Str::random(80);
         $user->save();
         auth()->logout();
     }
-
     return redirect()->route('index')
         ->withCookie(cookie()->forget('app_auth_token'));
 })->name('logout');

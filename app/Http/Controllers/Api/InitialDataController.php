@@ -17,7 +17,7 @@ class InitialDataController extends Controller
         $user = User::select(['id', 'name', 'avatar'])
             ->selectAccessor(['avatar_url'])
             ->find($request->user()?->id)
-            ->makeHidden(['avatar']);
+            ?->makeHidden(['avatar']);
 
         return response()->json([
             'user' => $user,

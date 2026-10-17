@@ -13,14 +13,16 @@ export default function LoginModal() {
             onClick={closeLoginModal}
         >
             <div
-                className="relative w-full max-w-[540px] mb-[20px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[50px] pb-[35px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]"
+                className="relative w-full max-w-[540px] mb-[20px] rounded-[28px] border-2 border-[#e3d1ac] bg-gradient-to-b from-[rgba(253,247,245,0.85)] to-[rgba(244,236,208,0.75)] p-[25px] pt-[50px] pb-[35px] shadow-[0_20px_50px_rgba(15,23,20,0.35),inset_0_0_0_1px_rgba(255,255,255,0.7)] backdrop-blur-[12px]
+                     before:pointer-events-none before:absolute before:inset-[4px] before:rounded-[22px] before:border before:border-[rgba(194,159,102,0.3)] before:content-['']
+                "
                 onClick={(e) => e.stopPropagation()}
             >
 
-                <img className="absolute top-[-46px] w-[220px] left-1/2 -translate-x-1/2 pointer-events-none" src="/assets/decoration-a-top.png?" alt=""/>
-                <img className="absolute bottom-[-26px] w-[160px] left-1/2 -translate-x-1/2 pointer-events-none" src="/assets/decoration-a-bottom.png" alt=""/>
-                <img className="absolute top-[-30px] left-[-20px] w-[70px] pointer-events-none" src="/assets/decoration-a-corner-br.png" alt=""/>
-                <img className="absolute right-[-20px] bottom-[-30px] w-[70px] pointer-events-none" src="/assets/decoration-a-corner-tl.png" alt=""/>
+                <img className="absolute top-[-46px] w-[220px] left-1/2 -translate-x-1/2 pointer-events-none" src="/assets/images/decoration-a-top.png?" alt=""/>
+                <img className="absolute bottom-[-26px] w-[160px] left-1/2 -translate-x-1/2 pointer-events-none" src="/assets/images/decoration-a-bottom.png" alt=""/>
+                <img className="absolute top-[-30px] left-[-20px] w-[70px] pointer-events-none" src="/assets/images/decoration-a-corner-br.png" alt=""/>
+                <img className="absolute right-[-20px] bottom-[-30px] w-[70px] pointer-events-none" src="/assets/images/decoration-a-corner-tl.png" alt=""/>
 
                 {/* 閉じるボタン */}
                 <button
@@ -36,33 +38,33 @@ export default function LoginModal() {
                 <div className="mb-[40px]">
                     <h2 className="flex justify-center">
                         <img className="h-auto w-[380px] max-w-full"
-                             src="/assets/login-title.png"
+                             src="/assets/images/login-title.png"
                              alt=""
                         />
                     </h2>
                     <div
                         className="mt-[12px] flex items-center justify-center gap-[6px] text-[12px] tracking-[0.08em] text-[#8e7960]">
-                        <span><img className="w-[60px] -scale-x-100" src="/assets/needle-1.png" alt=""/></span>
+                        <span><img className="w-[60px] -scale-x-100" src="/assets/images/needle-1.png" alt=""/></span>
                         <span>ログインして、精霊樹の成長をはじめよう</span>
-                        <span><img className="w-[60px]" src="/assets/needle-1.png" alt=""/></span>
+                        <span><img className="w-[60px]" src="/assets/images/needle-1.png" alt=""/></span>
                     </div>
                 </div>
 
                 <div className="buttons flex flex-col items-center gap-[12px] text-[14px]">
                     <a href="login/google" className="buttonFrame color-google">
-                        <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration left" src="/assets/images/decoration-side-2.png" alt=""/>
                         Googleでログイン
-                        <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration right" src="/assets/images/decoration-side-2.png" alt=""/>
                     </a>
                     <a href="login/twitter" className="buttonFrame color-x">
-                        <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration left" src="/assets/images/decoration-side-2.png" alt=""/>
                         Xでログイン
-                        <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration right" src="/assets/images/decoration-side-2.png" alt=""/>
                     </a>
                     <a href="login/line" type="button" className="buttonFrame color-line">
-                        <img className="decoration left pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration left" src="/assets/images/decoration-side-2.png" alt=""/>
                         LINEでログイン
-                        <img className="decoration right pointer-events-none" src="/assets/decoration-side-2.png" alt=""/>
+                        <img className="decoration right" src="/assets/images/decoration-side-2.png" alt=""/>
                     </a>
                 </div>
 

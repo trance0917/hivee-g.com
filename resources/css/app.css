@@ -27,7 +27,7 @@
             0 2px 3px #79616a14;
         color: var(--label);
         .decoration{
-            @apply h-auto w-[12px] max-w-full absolute;
+            @apply h-auto w-[12px] max-w-full absolute pointer-events-none;
             &.left{
                 @apply left-[-5px] pointer-events-none;
             }
@@ -50,7 +50,7 @@
 
 @keyframes glow-pulse {
     0%, 100% {
-        filter: drop-shadow(0 3px 5px rgba(255, 255, 255, 0.4));
+        filter: drop-shadow(0 3px 5px rgba(255, 255, 255, 0.5));
     }
     50% {
         filter: drop-shadow(0 10px 20px rgba(255, 255, 255, 1));
