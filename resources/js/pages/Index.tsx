@@ -8,13 +8,13 @@ export default function Index() {
     const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
     const user = useUser();
     const navigate = useNavigate();
-    const [isLeaving, setIsLeaving] = useState(false);
+    const [isToWorld, setIsToWorld] = useState(false);
     const handleWorldClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
 
-        if (isLeaving) return;
+        if (isToWorld) return;
 
-        setIsLeaving(true);
+        setIsToWorld(true);
 
         // アニメーション完了後に遷移
         setTimeout(() => {
@@ -50,7 +50,7 @@ export default function Index() {
 
                 <div
                     className={`relative z-[10] transition-transform duration-700 ease-in-out
-        ${isLeaving ? "-translate-y-[150px]" : "translate-y-0"}
+        ${isToWorld ? "-translate-y-[150px]" : "translate-y-0"}
     `}
                 >
                     <Header />
@@ -63,7 +63,7 @@ export default function Index() {
                               className={`cursor-pointer border-none bg-transparent outline-none
                                   transition-all duration-700 ease-in-out
                                   hover:brightness-115
-                                  ${isLeaving
+                                  ${isToWorld
                                       ? "scale-125 brightness-200 blur opacity-0"
                                       : ""
                               }`}>
@@ -98,7 +98,7 @@ export default function Index() {
                     <article className={`relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)]
                         before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']
                         transition-all duration-700 delay-100
-                        ${isLeaving ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
+                        ${isToWorld ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
                         `}>
                         <div className="flex items-center justify-between px-5 pb-2.5 pt-[18px] text-[14px] tracking-[0.08em]">
                             <strong>最新情報</strong>
@@ -135,7 +135,7 @@ export default function Index() {
                     <article className={`relative rounded-[18px] border border-[rgba(255,247,217,0.9)] bg-gradient-to-b from-[rgba(250,251,244,0.78)] to-[rgba(239,238,220,0.62)] backdrop-blur-[7px] shadow-[0_12px_34px_rgba(24,27,24,0.16),inset_0_0_0_1px_rgba(255,255,255,0.38)]
                         before:pointer-events-none before:absolute before:inset-[7px] before:rounded-[12px] before:border before:border-[rgba(194,159,102,0.25)] before:content-['']
                         transition-all duration-700
-                        ${isLeaving ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
+                        ${isToWorld ? "opacity-0 top-[250px]" : "opacity-100 top-[0]"}
                         `}>
                         {/* ヘッダー */}
                         <div className="flex items-center justify-between px-5 pb-2.5 pt-[18px] text-[14px] tracking-[0.08em]">
@@ -164,7 +164,7 @@ export default function Index() {
                     className={`
             fixed inset-0 z-[9999] pointer-events-none
             bg-[#fffaf0] transition duration-700
-            ${isLeaving ? "opacity-100" : "opacity-0"}
+            ${isToWorld ? "opacity-100" : "opacity-0"}
         `}
                 />
             </div>

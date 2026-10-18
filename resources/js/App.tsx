@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
+import WorldIndex from '@/pages/world/Index';
 import LoginModal from '@/components/LoginModal';
 import { useInitialDataStore } from '@/stores/useInitialDataStore';
 
@@ -42,6 +43,8 @@ export default function App() {
                     <Routes>
                         <Route index element={<Index />} />
                         {/* 別ページもここに追加するだけで共通の初期化処理が適用される */}
+                        <Route path="/world" element={<WorldIndex />} />
+
                     </Routes>
                     <LoginModal />
                 </>
