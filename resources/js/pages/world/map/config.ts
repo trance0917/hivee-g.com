@@ -1,7 +1,7 @@
 /** Worldマップの共通設定。テスト版 MapSample.tsx の初期値を継承。 */
 export const MAP_CENTER = { lng: 135.456119, lat: 34.52478 } as const;
 export const MAP_ZOOM = 13;
-export const MAP_PITCH = 45;
+export const MAP_PITCH = 30;
 export const MAP_BEARING = -15;
 export const MAP_MIN_ZOOM = 10;
 export const MAP_MAX_ZOOM = 14;
