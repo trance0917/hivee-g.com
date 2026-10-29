@@ -15,7 +15,7 @@ export default function HexInfoPanel() {
     const [lat, lng] = activeHex ? cellToLatLng(activeHex) : [null, null];
 
     return (
-        <div className="pointer-events-auto absolute right-4 top-4 z-20 w-72 max-w-[calc(100vw-2rem)]">
+        <div className="pointer-events-auto absolute right-[30px] top-[50px] z-20 w-72 max-w-[calc(100vw-2rem)]">
             <PanelFrame title="選択マスの情報" onClose={() => closeWindow('hexInfo')}>
                 {activeHex ? (
                     <div className="space-y-2 text-sm">

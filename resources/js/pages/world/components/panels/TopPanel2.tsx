@@ -12,11 +12,7 @@ export default function TopPanel2() {
 
     return (
         <div className="pointer-events-auto absolute left-4 top-4 z-20 w-64 max-w-[calc(100vw-2rem)]">
-            <div className="mb-3">
-                <Link to="/" className="inline-block rounded bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow hover:bg-slate-50">
-                    ← ホームに戻る
-                </Link>
-            </div>
+
             <PanelFrame title="マップ操作">
                 <div className="flex gap-2">
                     <button type="button" onClick={zoomIn} disabled={!ready} className="flex-1 rounded bg-slate-800 px-3 py-2 text-white disabled:opacity-50" aria-label="拡大">＋</button>
