@@ -1,5 +1,8 @@
+import {Link} from 'react-router-dom';
 import { useLoginModalStore } from "@/stores/useLoginModalStore";
 import { useUser } from "@/stores/useInitialDataStore";
+import ChatTest from '@/ChatTest';
+
 export default function Header() {
     const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
     const user = useUser();
@@ -33,6 +36,9 @@ export default function Header() {
                 <a href="#">ホーム</a>
                 <a href="#">ゲーム紹介</a>
                 <a href="#">お知らせ</a>
+                <Link to="/test/chat" style={{color: 'blue'}}>
+                    チャット
+                </Link>
             </nav>
 
             <div className="relative z-[6] flex h-[70px] items-center justify-center">

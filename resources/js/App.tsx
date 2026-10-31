@@ -4,6 +4,7 @@ import Index from '@/pages/Index';
 import WorldIndex from '@/pages/world/Index';
 import LoginModal from '@/components/LoginModal';
 import { useInitialDataStore } from '@/stores/useInitialDataStore';
+import ChatTest from './ChatTest';
 
 type BootStatus = 'loading' | 'ready' | 'error';
 
@@ -44,7 +45,9 @@ export default function App() {
                         <Route index element={<Index />} />
                         {/* 別ページもここに追加するだけで共通の初期化処理が適用される */}
                         <Route path="/world" element={<WorldIndex />} />
-
+                        <Route path="/test">
+                            <Route path="chat" element={<ChatTest/>}/>
+                        </Route>
                     </Routes>
                     <LoginModal />
                 </>
