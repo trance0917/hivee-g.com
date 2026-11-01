@@ -19,14 +19,12 @@ export default function TopPanel({ onLeaveClick }: TopPanelProps) {
             <ul className="flex justify-center gap-[10px]">
                 <li>
                     <Link to="/" className="flex flex-col items-center" onClick={onLeaveClick}>
-                        <img className="w-[46px]" src="/assets/images/menu/icon-home.png" />
-                        <span className="text-[12px] text-slate-500">ホーム</span>
+                        <img className="w-[36px]" src="/assets/images/menu/icon-home.png" />
                     </Link>
                 </li>
                 <li>
                     <Link to="/" className="flex flex-col items-center" onClick={onLeaveClick}>
-                        <img className="w-[46px]" src="/assets/images/menu/icon-user.png" />
-                        <span className="text-[12px] text-slate-500">マイページ</span>
+                        <img className="w-[36px]" src="/assets/images/menu/icon-user.png" />
                     </Link>
                 </li>
             </ul>

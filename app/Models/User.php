@@ -50,7 +50,6 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SelectAccessorTrait, SoftDeletes;
 
-    //noticifationもbootかなにかでread_atにはいるようにする
     protected $guarded = [];
 
     protected $hidden = [

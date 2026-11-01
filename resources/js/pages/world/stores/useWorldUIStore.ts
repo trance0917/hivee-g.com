@@ -11,7 +11,7 @@ type WorldUIState = {
 };
 
 export const useWorldUIStore = create<WorldUIState>((set) => ({
-    windows: { selection: true, hexInfo: false },
+    windows: { selection: true, hexInfo: false},
     openWindow: (name) => set((state) => ({
         windows: { ...state.windows, [name]: true },
     })),

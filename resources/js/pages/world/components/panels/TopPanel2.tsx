@@ -11,7 +11,7 @@ export default function TopPanel2() {
     const toggleWindow = useWorldUIStore((state) => state.toggleWindow);
 
     return (
-        <div className="pointer-events-auto absolute left-4 top-4 z-20 w-64 max-w-[calc(100vw-2rem)]">
+        <div className="pointer-events-auto absolute left-[5px] top-[5px] z-20 w-64 max-w-[calc(100vw-2rem)]">
 
             <PanelFrame title="マップ操作">
                 <div className="flex gap-2">

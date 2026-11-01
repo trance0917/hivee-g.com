@@ -1,37 +1,33 @@
-import { cellToLatLng } from 'h3-js';
-import { useWorldStore } from '../../stores/useWorldStore';
-import { useWorldUIStore } from '../../stores/useWorldUIStore';
-import PanelFrame from './PanelFrame';
+import PanelFrame from '@/pages/world/components/panels/PanelFrame';
+import ChatPanel from '@/pages/world/components/panels/ChatPanel';
 
-/** 左下：テスト版にあった選択数と座標出力。 */
+/** ワールド画面下部のUI。チャット75% + キャラクター情報25%。 */
 export default function BottomPanel() {
-    const selectedHexes = useWorldStore((state) => state.selectedHexes);
-    const clearSelection = useWorldStore((state) => state.clearSelection);
-    const isOpen = useWorldUIStore((state) => state.windows.selection);
-    const closeWindow = useWorldUIStore((state) => state.closeWindow);
-    if (!isOpen) return null;
-
-    const exportCoordinates = () => {
-        const data = Array.from(selectedHexes).map((hex) => {
-            const [lat, lng] = cellToLatLng(hex);
-            return { hex_id: hex, latitude: lat, longitude: lng };
-        });
-        console.table(data); // 元のテスト版と同じ動作
-    };
-
     return (
-        <div className="pointer-events-auto absolute bottom-4 left-4 z-20 w-72 max-w-[calc(100vw-2rem)]">
-            <PanelFrame title="村配置エディタ（ハニカム）" onClose={() => closeWindow('selection')}>
-                <p className="text-sm text-slate-600">マップをクリックしてマスをトグル</p>
-                <p className="mt-2 text-sm font-semibold text-blue-700">選択中: {selectedHexes.size} マス</p>
-                <button type="button" onClick={exportCoordinates}
-                    className="mt-3 w-full rounded bg-slate-800 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700">
-                    📋 座標をコンソールに出力
-                </button>
-                <button type="button" onClick={clearSelection}
-                    className="mt-2 w-full rounded border border-slate-300 px-3 py-1.5 text-xs hover:bg-slate-50">
-                    選択をクリア
-                </button>
+        <div className="pointer-events-auto absolute bottom-[10px] left-[10px] right-[10px] z-20">
+            <PanelFrame>
+                <div className="flex h-[clamp(210px,30vh,340px)]">
+                    {/* 左側：チャット */}
+                    <div className="flex-[3]">
+                        <ChatPanel />
+                    </div>
+
+                    {/* 右側：キャラクターの状態。現時点では画面の仮置きのみ */}
+                    {/*<aside className="flex min-w-0 flex-1 flex-col gap-[8px] border-l border-white/20 p-[10px] text-xs">*/}
+                    {/*    <h2 className="text-sm font-semibold">キャラクター</h2>*/}
+                    {/*    <div className="space-y-[5px] text-slate-300">*/}
+                    {/*        <p>名前：―</p>*/}
+                    {/*        <p>職業：―</p>*/}
+                    {/*        <p>Lv：―</p>*/}
+                    {/*    </div>*/}
+                    {/*    <div className="mt-auto space-y-[5px]">*/}
+                    {/*        <div className="flex items-center justify-between gap-[8px]"><span>HP</span><span>― / ―</span></div>*/}
+                    {/*        <div className="h-[8px] rounded bg-white/15" />*/}
+                    {/*        <div className="flex items-center justify-between gap-[8px]"><span>体力</span><span>― / ―</span></div>*/}
+                    {/*        <div className="h-[8px] rounded bg-white/15" />*/}
+                    {/*    </div>*/}
+                    {/*</aside>*/}
+                </div>
             </PanelFrame>
         </div>
     );
