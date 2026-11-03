@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useUser } from "@/stores/useInitialDataStore";
 
 /** 見た目を確認するための仮データ。APIやWebSocketはまだ使用しない。 */
 type ChatKind = 'normal' | 'village' | 'global' | 'direct' | 'nearby';
@@ -37,6 +38,8 @@ export default function ChatPanel() {
 
     const allSelected = visibleKinds.length === KINDS.length;
     const filteredMessages = messages.filter((message) => visibleKinds.includes(message.kind));
+
+    const user = useUser();
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ block: 'nearest' });
@@ -99,16 +102,17 @@ export default function ChatPanel() {
             <form onSubmit={sendPreview} className="flex min-w-0 gap-[5px] border-t border-white/20 px-[8px] py-[8px]">
                 <input
                     type="text"
-                    value={input}
+                    value={user ? input : ''}
                     onChange={(event) => setInput(event.target.value)}
-                    placeholder="メッセージを入力"
+                    placeholder={user ? 'メッセージを入力' : 'ログインしてチャットを送信'}
+                    readOnly={!user}
                     aria-label="チャット入力"
-                    className="min-w-0 flex-1 rounded border border-slate-300/80 bg-white/50 px-[5px] py-[5px] text-[13px] text-slate-600 outline-none focus:border-slate-400/60"
+                    className={`min-w-0 flex-1 rounded border border-slate-300/80 px-[5px] py-[5px] text-[13px] text-slate-600 outline-none focus:border-slate-400/60 ${!user ? 'cursor-not-allowed placeholder:text-red-400 bg-slate-200' : 'bg-white/50'}`}
                 />
                 <button
                     type="submit"
                     disabled={!input.trim()}
-                    className="rounded px-[10px] py-[5px] bg-slate-400 text-white text-[14px] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded px-[10px] py-[5px] bg-blue-400 text-white text-[14px] disabled:cursor-not-allowed disabled:bg-slate-400/80"
                 >
                     送信
                 </button>

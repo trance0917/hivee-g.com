@@ -5,7 +5,7 @@ import ChatPanel from '@/pages/world/components/panels/ChatPanel';
 export default function BottomPanel() {
     return (
         <div className="pointer-events-auto absolute bottom-[10px] left-[10px] right-[10px] z-20">
-            <PanelFrame>
+            <PanelFrame isCenterDecoration={true}>
                 <div className="flex h-[clamp(210px,30vh,340px)]">
                     {/* 左側：チャット */}
                     <div className="flex-[3]">
