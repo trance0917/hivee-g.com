@@ -1,15 +1,18 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import * as maplibregl from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+maplibregl.setWorkerUrl(workerUrl);
 import { latLngToCell } from 'h3-js';
-import { useWorldMapController } from '../context/WorldMapContext';
-import { useWorldStore } from '../stores/useWorldStore';
-import { useWorldUIStore } from '../stores/useWorldUIStore';
+import { useWorldMapController } from '@/pages/world/context/WorldMapContext';
+import { useWorldStore } from '@/pages/world/stores/useWorldStore';
+import { useWorldUIStore } from '@/pages/world/stores/useWorldUIStore';
 import {
     H3_RESOLUTION, MAP_BEARING, MAP_CENTER, MAP_MAX_ZOOM,
     MAP_MIN_ZOOM, MAP_PITCH, MAP_STYLE_URL, MAP_ZOOM,
-} from '../map/config';
-import { addH3Layers, updateSelectedGrid, updateVisibleGrid } from '../map/h3Grid';
+} from '@/pages/world/map/config';
+import { addH3Layers, updateSelectedGrid, updateVisibleGrid } from '@/pages/world/map/h3Grid';
+import { attachRegisteredHexLayer } from '@/pages/world/map/registeredHexLayer';
 
 /** MapLibre初期化・H3描画・クリック操作・後片付けをひとまとめに。 */
 export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
@@ -35,6 +38,7 @@ export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
             touchPitch: false, // スマホの2本指で角度変更を禁止する
         });
         mapRef.current = map;
+        let cleanupRegisteredHexes: (() => void) | null = null;
 
         const onMoveEnd = () => updateVisibleGrid(map);
         const onMapClick = (e: maplibregl.MapMouseEvent) => {
@@ -45,6 +49,8 @@ export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
         };
         const onLoad = () => {
             addH3Layers(map);
+            // H3選択マスの下に登録済みマスを描画（DBデータをAPIから一度取得）。
+            cleanupRegisteredHexes = attachRegisteredHexLayer(map);
             updateVisibleGrid(map);
             updateSelectedGrid(map, useWorldStore.getState().selectedHexes);
             map.on('moveend', onMoveEnd);
@@ -54,6 +60,7 @@ export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
 
         map.on('load', onLoad);
         return () => {
+            cleanupRegisteredHexes?.(); // 画面離脱時にAPI取得を中断
             map.off('load', onLoad);
             map.off('moveend', onMoveEnd);
             map.off('click', onMapClick);

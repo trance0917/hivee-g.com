@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { Map } from 'maplibre-gl';
-import { MAP_BEARING, MAP_CENTER, MAP_PITCH, MAP_ZOOM } from '../map/config';
+
+import { MAP_BEARING, MAP_CENTER, MAP_PITCH, MAP_ZOOM } from '@/pages/world/map/config';
 
 /** 複数パネルから操作するための共通インターフェース。マップ本体はZustandには入れない。 */
 type MapController = {

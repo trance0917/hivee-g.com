@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useWorldMap } from '../hooks/useWorldMap';
+import { useWorldMap } from '@/pages/world/hooks/useWorldMap';
 
 /** マップ表示専用。ボタンやパネルはここへ入れない。 */
 export default function WorldMap() {

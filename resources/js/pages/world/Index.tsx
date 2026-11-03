@@ -1,14 +1,14 @@
 import { useEffect, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import WorldMap from './components/WorldMap';
+import WorldMap from '@/pages/world/components/WorldMap';
 
-import TopPanel from './components/panels/TopPanel';
+import TopPanel from '@/pages/world/components/panels/TopPanel';
 
 
 import TopPanel2 from './components/panels/TopPanel2';
-import BottomPanel from './components/panels/BottomPanel';
-import HexInfoPanel from './components/panels/HexInfoPanel';
-import { WorldMapProvider } from './context/WorldMapContext';
+import BottomPanel from '@/pages/world/components/panels/BottomPanel';
+import HexInfoPanel from '@/pages/world/components/panels/HexInfoPanel';
+import { WorldMapProvider } from '@/pages/world/context/WorldMapContext';
 import {MAP_STYLE_URL} from "@/pages/world/map/config";
 
 /** 画面構成のみ。マップとUIの実装詳細をここに増やさない。 */
