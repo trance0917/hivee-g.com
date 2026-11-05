@@ -10,7 +10,7 @@ enum ChatMessageType: int
 {
     case VillageLocal = 1;    // なし: 現在いる村
     case VillageMember = 2;   // #: 所属する村
-    case Global = 3;          // $$: 全体
+    case Global = 3;          // **: 全体
     case Direct = 4;          // @: 個人
     case Prefecture = 5;      // $: 所属都道府県
     case Alliance = 6;        // ##: 村の同盟

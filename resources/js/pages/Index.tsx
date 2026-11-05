@@ -2,11 +2,13 @@ import {useEffect, useRef, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 import Header from "@/components/Header";
 import { useLoginModalStore } from "@/stores/useLoginModalStore";
-import { useUser } from "@/stores/useInitialDataStore";
+import { useUser, useCharacter } from "@/stores/useInitialDataStore";
 
 export default function Index() {
     const openLoginModal = useLoginModalStore((state) => state.openLoginModal);
     const user = useUser();
+    const character = useCharacter();
+
     const navigate = useNavigate();
     const [isToWorld, setIsToWorld] = useState(false);
     const handleWorldClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

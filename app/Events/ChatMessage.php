@@ -3,40 +3,35 @@
 namespace App\Events;
 
 use App\Models\ChatMessage as ChatMessageModel;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-/**
- * 全チャット種別で共有するブロードキャストイベント。
- * 配信先チャンネルは送信APIの入力ではなく、
- * サーバー側で認証・判定して渡す。
- */
+/** 全体は公開チャンネル、DMは所有者のみ購読可能な非公開チャンネルへ配信。 */
 class ChatMessage implements ShouldBroadcast
 {
     use Dispatchable, SerializesModels;
 
     /**
      * @param array<int, string> $channels
-     * 例: ['chat.global', 'chat.user.123']
+     * 例: ['chat.global'] / ['chat.character.12', 'chat.character.34']
      */
     public function __construct(
         public ChatMessageModel $chatMessage,
         public array $channels,
     ) {}
 
-    /** @return array<int, PrivateChannel> */
+    /** @return array<int, Channel> */
     public function broadcastOn(): array
     {
-        return $this->channels
-                |> array_unique(...)
-                |> array_values(...)
-                |> (static fn (array $channels): array => array_map(
-                    static fn (string $channel): PrivateChannel =>
-                    new PrivateChannel($channel),
-                    $channels
-                ));
+        return array_map(
+            static fn (string $name): Channel => $name === 'chat.global'
+                ? new Channel($name)
+                : new PrivateChannel($name),
+            array_values(array_unique($this->channels)),
+        );
     }
 
     public function broadcastAs(): string
@@ -44,10 +39,7 @@ class ChatMessage implements ShouldBroadcast
         return 'chat-message';
     }
 
-    /**
-     * 公開してよいフィールドだけを配信する。
-     * IP・User-Agent等の運営専用情報は配信しない。
-     */
+    /** IPアドレスやUser-Agent等の管理情報は配信しない。 */
     public function broadcastWith(): array
     {
         return [

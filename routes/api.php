@@ -10,9 +10,9 @@ Route::get('/initial-data', InitialDataController::class);
 Route::get('/chat/messages', [ChatController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+//    Route::get('/user', function (Request $request) {
+//        return $request->user();
+//    });
     Route::post('/chat/send', [ChatController::class, 'store'])->middleware('throttle:15,1');
 });
 

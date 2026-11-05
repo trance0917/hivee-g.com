@@ -15,6 +15,7 @@ use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -66,6 +67,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'active_character_id' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -82,6 +84,10 @@ class User extends Authenticatable
         });
     }
 
+    public function activeCharacter(): BelongsTo
+    {
+        return $this->belongsTo(Character::class, 'active_character_id');
+    }
 
     public function user_social_accounts()
     {
