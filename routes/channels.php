@@ -17,3 +17,16 @@ Broadcast::channel('chat.character.{characterId}', function ($user, $characterId
         ->where('user_id', $user->id)
         ->exists();
 });
+
+
+Broadcast::channel('chat.village.{villageId}', function ($user, $villageId): bool {
+    if (!ctype_digit((string) $villageId) || $user->active_character_id === null) {
+        return false;
+    }
+
+    return \App\Models\Character::query()
+        ->whereKey($user->active_character_id)
+        ->where('user_id', $user->id)
+        ->where('village_id', (int) $villageId)
+        ->exists();
+});

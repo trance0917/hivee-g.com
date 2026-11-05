@@ -13,15 +13,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * 現段階で送信できるチャット: 全体 (**本文)・個人 (@公開キャラクターID 本文)。
+ * 現段階で送信できるチャット: 所属村 (#本文)・全体 (**本文)・個人 (@公開キャラクターID 本文)。
  * それ以外を誤って全体チャットとして扱わない。
  */
 class ChatController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $userId = $request->user('sanctum')?->id;
+        $user = $request->user('sanctum');
+        $userId = $user?->id;
         $limit = 200;
+
+        // 送信時と同じく、操作中キャラクターの所属村のみを対象にする。
+        $activeCharacter = ($user && $user->active_character_id)
+            ? Character::query()->whereKey($user->active_character_id)->where('user_id', $userId)->first()
+            : null;
+        $villageId = $activeCharacter?->village_id;
 
         // 各クエリを最新200件で打ち切ってから結合（既存インデックスを利用）。
         $global = ChatMessage::query()
@@ -30,8 +37,17 @@ class ChatController extends Controller
             ->limit($limit)
             ->get();
 
+        $village = $villageId !== null
+            ? ChatMessage::query()
+                ->where('type', ChatMessageType::VillageMember->value)
+                ->where('target_id', $villageId)
+                ->orderByDesc('id')
+                ->limit($limit)
+                ->get()
+            : collect();
+
         $characterIds = [];
-        $messages = $global;
+        $messages = $global->concat($village);
 
         if ($userId !== null) {
             $characterIds = Character::query()
@@ -55,7 +71,7 @@ class ChatController extends Controller
                 ->limit($limit)
                 ->get();
 
-            $messages = $global->concat($sent)->concat($received)
+            $messages = $global->concat($village)->concat($sent)->concat($received)
                 ->unique('id')
                 ->sortByDesc('id')
                 ->take($limit);
@@ -66,6 +82,7 @@ class ChatController extends Controller
                 fn (ChatMessage $message): array => $this->formatMessage($message)
             ),
             'character_ids' => $characterIds,
+            'village_id' => $villageId !== null ? (int) $villageId : null,
         ]);
     }
 
@@ -86,7 +103,10 @@ class ChatController extends Controller
             $message->character_id = $sender?->id;
             $message->sender_character_text_id = $sender?->text_id;
             $message->type = $type;
-            $message->target_id = null;
+            $message->target_id = match ($type) {
+                ChatMessageType::VillageMember => (int) $sender->village_id,
+                default => null,
+            };
             $message->recipient_user_id = $recipient?->user_id;
             $message->recipient_character_id = $recipient?->id;
             $message->recipient_character_text_id = $recipient?->text_id;
@@ -100,13 +120,15 @@ class ChatController extends Controller
         });
 
         // 配信チャンネルは入力値からではなく、検証済みDBレコードから構築する。
-        // 全体は公開、DMは自キャラと相手キャラの非公開チャンネル。
-        $channels = $type === ChatMessageType::Global
-            ? ['chat.global']
-            : array_values(array_unique([
+        // 全体は公開、村とDMは非公開チャンネル。宛先は検証済みデータから構築する。
+        $channels = match ($type) {
+            ChatMessageType::Global => ['chat.global'],
+            ChatMessageType::VillageMember => ['chat.village.'.$message->target_id],
+            ChatMessageType::Direct => array_values(array_unique([
                 'chat.character.'.$sender->id,
                 'chat.character.'.$recipient->id,
-            ]));
+            ])),
+        };
 
         broadcast(new ChatMessageEvent($message, $channels));
 

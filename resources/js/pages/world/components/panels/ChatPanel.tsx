@@ -19,6 +19,7 @@ type ChatMessage = {
 type ChatHistoryResponse = {
     messages: ChatMessage[];
     character_ids: number[];
+    village_id: number | null;
 };
 
 const CHAT_TYPES: Record<ChatKind, { label: string; dot: string; color: string }> = {
@@ -82,6 +83,7 @@ export default function ChatPanel() {
         let active = true;
         const controller = new AbortController();
         const characterChannels: string[] = [];
+        let villageChannel: string | null = null;
         const echo = window.Echo;
 
         const receive = (message: ChatMessage) => {
@@ -105,6 +107,12 @@ export default function ChatPanel() {
                 setMessages((previous) => mergeMessages(previous, data.messages));
 
                 if (user) {
+                    // 所属村のprivateチャンネル。認可はLaravel側で行う。
+                    if (data.village_id !== null) {
+                        villageChannel = `chat.village.${data.village_id}`;
+                        echo.private(villageChannel).listen('.chat-message', receive);
+                    }
+
                     for (const id of data.character_ids) {
                         const channel = `chat.character.${id}`;
                         characterChannels.push(channel);
@@ -124,9 +132,10 @@ export default function ChatPanel() {
             active = false;
             controller.abort();
             echo.leave('chat.global');
+            if (villageChannel) echo.leave(villageChannel);
             for (const channel of characterChannels) echo.leave(channel);
         };
-    }, [user?.id]);
+    }, [user?.id, user?.active_character_id]);
 
     const toggleKind = (kind: ChatKind) => {
         setVisibleKinds((previous) =>
@@ -207,7 +216,7 @@ export default function ChatPanel() {
                     onChange={(event) => setInput(event.target.value)}
                     placeholder={user ? 'メッセージを入力' : 'ログインしてチャットを送信'}
                     readOnly={!user || isSending}
-                    title="全体: ** 本文 / 個人: @キャラクターID 本文"
+                    title="所属村: # 本文 / 全体: ** 本文 / 個人: @キャラクターID 本文"
                     aria-label="チャット入力"
                     className={`min-w-0 flex-1 rounded border border-slate-300/80 px-[5px] py-[5px] text-[13px] text-slate-600 outline-none focus:border-slate-400/60 ${!user ? 'cursor-not-allowed placeholder:text-red-400 bg-slate-200' : 'bg-white/50'}`}
                 />

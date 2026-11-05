@@ -64,28 +64,25 @@ class StoreChatMessageRequest extends FormRequest
                 $raw = trim($this->input('message'));
                 $recipient = null;
 
-                if (str_starts_with($raw, '**')) {
+                if (str_starts_with($raw, '** ')) {
                     $type = ChatMessageType::Global;
-                    // 「**こんにちは」「** こんにちは」の両方に対応。
-                    $body = trim(substr($raw, 2));
+                    $body = trim(substr($raw, 3));
                 } elseif (preg_match('/^@([a-zA-Z0-9_-]{3,32})\s+(.+)$/us', $raw, $matches)) {
                     $type = ChatMessageType::Direct;
                     $body = trim($matches[2]);
                     $recipient = Character::query()->where('text_id', $matches[1])->first();
 
-                    if($user->activeCharacter->text_id === $matches[1]){
-                        $validator->errors()->add('message', '自分自身には送れません。');
-                        return;
-                    }else if ($recipient === null) {
+                    if ($recipient === null) {
                         $validator->errors()->add('message', '宛先の公開キャラクターIDが見つかりません。');
                         return;
                     }
-                } elseif (str_starts_with($raw, '#')) {
-
+                } elseif (str_starts_with($raw, '# ')) {
+                    $type = ChatMessageType::VillageMember;
+                    $body = trim(substr($raw, 2));
                 } else {
                     $validator->errors()->add(
                         'message',
-                        '全体は「** 本文」、個人宛は「@キャラクターID 本文」で送信してね。'
+                        '所属村は「# 本文」、全体は「** 本文」、個人宛は「@キャラクターID 本文」で送信してね。'
                     );
                     return;
                 }
@@ -121,6 +118,18 @@ class StoreChatMessageRequest extends FormRequest
 
                 if ($sender === null) {
                     $validator->errors()->add('message', '使用中のキャラクターが見つかりません。');
+                    return;
+                }
+
+                // DMの自分宛チェックは、操作中キャラを確定した後に行う。
+                if ($type === ChatMessageType::Direct && $recipient->id === $sender->id) {
+                    $validator->errors()->add('message', '自分自身には送れません。');
+                    return;
+                }
+
+                // 所属村の未設定を防ぐ。
+                if ($type === ChatMessageType::VillageMember && $sender->village_id === null) {
+                    $validator->errors()->add('message', '使用中キャラクターの所属村が設定されていません。');
                     return;
                 }
 
