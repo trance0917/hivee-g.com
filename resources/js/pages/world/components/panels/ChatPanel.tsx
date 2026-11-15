@@ -9,16 +9,15 @@ type ChatMessage = {
     id: number;
     type: number;
     user_id: number;
-    character_id: number | null;
-    sender_character_text_id: string | null;
-    recipient_character_text_id: string | null;
+    sender_user_text_id: string | null;
+    recipient_user_id: number | null;
+    recipient_user_text_id: string | null;
     message: string;
     created_at: string | null;
 };
 
 type ChatHistoryResponse = {
     messages: ChatMessage[];
-    character_ids: number[];
     village_id: number | null;
 };
 
@@ -82,7 +81,7 @@ export default function ChatPanel() {
     useEffect(() => {
         let active = true;
         const controller = new AbortController();
-        const characterChannels: string[] = [];
+        let userChannel: string | null = null;
         let villageChannel: string | null = null;
         const echo = window.Echo;
 
@@ -92,6 +91,11 @@ export default function ChatPanel() {
 
         // 公開チャンネルは未ログインでも購読できる。
         echo.channel('chat.global').listen('.chat-message', receive);
+        // DMはアカウントごとに1つの非公開チャンネルを購読する。
+        if (user) {
+            userChannel = `chat.user.${user.id}`;
+            echo.private(userChannel).listen('.chat-message', receive);
+        }
 
         const initialize = async () => {
             setLoading(true);
@@ -112,12 +116,6 @@ export default function ChatPanel() {
                         villageChannel = `chat.village.${data.village_id}`;
                         echo.private(villageChannel).listen('.chat-message', receive);
                     }
-
-                    for (const id of data.character_ids) {
-                        const channel = `chat.character.${id}`;
-                        characterChannels.push(channel);
-                        echo.private(channel).listen('.chat-message', receive);
-                    }
                 }
             } catch (err) {
                 if (active) setError(getErrorMessage(err));
@@ -133,9 +131,9 @@ export default function ChatPanel() {
             controller.abort();
             echo.leave('chat.global');
             if (villageChannel) echo.leave(villageChannel);
-            for (const channel of characterChannels) echo.leave(channel);
+            if (userChannel) echo.leave(userChannel);
         };
-    }, [user?.id, user?.active_character_id]);
+    }, [user?.id, user?.village_id]);
 
     const toggleKind = (kind: ChatKind) => {
         setVisibleKinds((previous) =>
@@ -159,8 +157,8 @@ export default function ChatPanel() {
             setMessages((previous) => mergeMessages(previous, [data.message]));
             setInput('');
         } catch (err) {
+            // 再入力を強制しない。バリデーションエラー時も本文を保持する。
             setError(getErrorMessage(err));
-            setInput('');
         } finally {
             setIsSending(false);
         }
@@ -194,12 +192,12 @@ export default function ChatPanel() {
                 {loading && <p className="text-slate-400">履歴を読み込み中...</p>}
                 {filteredMessages.map((message) => {
                     const kind = messageKind(message.type);
-                    const sender = message.sender_character_text_id ?? `ユーザー${message.user_id}`;
+                    const sender = message.sender_user_text_id ?? `ユーザー${message.user_id}`;
                     return (
                         <p key={message.id} className={`break-words ${CHAT_TYPES[kind].color}`}>
                             <span className="font-medium">{sender}：</span>
-                            {kind === 'direct' && message.recipient_character_text_id && (
-                                <span className="font-medium">@{message.recipient_character_text_id} </span>
+                            {kind === 'direct' && message.recipient_user_id !== null && (
+                                <span className="font-medium">@{message.recipient_user_text_id ?? `ユーザー${message.recipient_user_id}`} </span>
                             )}
                             {message.message}
                         </p>
@@ -216,7 +214,7 @@ export default function ChatPanel() {
                     onChange={(event) => setInput(event.target.value)}
                     placeholder={user ? 'メッセージを入力' : 'ログインしてチャットを送信'}
                     readOnly={!user || isSending}
-                    title="所属村: # 本文 / 全体: ** 本文 / 個人: @キャラクターID 本文"
+                    title="所属村: # 本文 / 全体: ** 本文 / 個人: @ユーザーID 本文"
                     aria-label="チャット入力"
                     className={`min-w-0 flex-1 rounded border border-slate-300/80 px-[5px] py-[5px] text-[13px] text-slate-600 outline-none focus:border-slate-400/60 ${!user ? 'cursor-not-allowed placeholder:text-red-400 bg-slate-200' : 'bg-white/50'}`}
                 />

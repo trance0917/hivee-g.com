@@ -14,11 +14,11 @@ class ChatMessage extends Model
     // IP/UAおよび公開IDのスナップショットはクライアント値で上書きさせず、送信APIでサーバー側から設定する。
     protected $fillable = [
         'user_id',
-        'character_id',
+        'sender_user_text_id',
         'type',
         'target_id',
         'recipient_user_id',
-        'recipient_character_id',
+        'recipient_user_text_id',
         'origin_h3',
         'message',
     ];
@@ -41,18 +41,8 @@ class ChatMessage extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function character(): BelongsTo
-    {
-        return $this->belongsTo(Character::class);
-    }
-
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recipient_user_id');
-    }
-
-    public function recipientCharacter(): BelongsTo
-    {
-        return $this->belongsTo(Character::class, 'recipient_character_id');
     }
 }

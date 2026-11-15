@@ -6,27 +6,14 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-// 個人チャット: 内部キャラクターIDを用い、その所有者だけに購読を許可する。
-Broadcast::channel('chat.character.{characterId}', function ($user, $characterId): bool {
-    if (!ctype_digit((string) $characterId)) {
-        return false;
-    }
-
-    return \App\Models\Character::query()
-        ->whereKey((int) $characterId)
-        ->where('user_id', $user->id)
-        ->exists();
+// 個人チャットはアカウント単位。キャラクターの選択状態に依存しない。
+Broadcast::channel('chat.user.{userId}', function ($user, $userId): bool {
+    return ctype_digit((string) $userId) && (int) $user->id === (int) $userId;
 });
 
-
+// 村チャットは妖精の滞在村ではなく、ユーザーの所属村の住民だけが購読できる。
 Broadcast::channel('chat.village.{villageId}', function ($user, $villageId): bool {
-    if (!ctype_digit((string) $villageId) || $user->active_character_id === null) {
-        return false;
-    }
-
-    return \App\Models\Character::query()
-        ->whereKey($user->active_character_id)
-        ->where('user_id', $user->id)
-        ->where('village_id', (int) $villageId)
-        ->exists();
+    return ctype_digit((string) $villageId)
+        && $user->village_id !== null
+        && (int) $user->village_id === (int) $villageId;
 });

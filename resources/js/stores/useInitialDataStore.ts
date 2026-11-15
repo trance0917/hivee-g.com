@@ -3,7 +3,7 @@ import { create } from 'zustand';
 type InitialDataState = {
     initData: any | null;
     user: any | null;
-    character: any | null;
+    characters: any[];
     isLoading: boolean;
     isInitialized: boolean;
     fetchInitialData: () => Promise<void>;
@@ -15,7 +15,7 @@ let initialDataRequest: Promise<void> | null = null;
 export const useInitialDataStore = create<InitialDataState>((set, get) => ({
     initData: null,
     user: null,
-    character: null,
+    characters: [],
     isLoading: false,
     isInitialized: false,
 
@@ -36,7 +36,7 @@ export const useInitialDataStore = create<InitialDataState>((set, get) => ({
 
                 // 未ログインを 401 で返すAPIにも対応（ログイン画面を表示できるようにする）。
                 if (res.status === 401) {
-                    set({ initData: null, user: null, character: null, isInitialized: true });
+                    set({ initData: null, user: null, characters: [], isInitialized: true });
                     return;
                 }
 
@@ -50,12 +50,12 @@ export const useInitialDataStore = create<InitialDataState>((set, get) => ({
                 set({
                     initData: json,
                     user: json.user ?? null,
-                    character: json.character ?? null,
+                    characters: Array.isArray(json.characters) ? json.characters : [],
                     isInitialized: true,
                 });
             } catch (error) {
                 // エラー時は App に通知し、ローディングを勝手に解除しない。
-                set({ initData: null, user: null, character: null, isInitialized: false });
+                set({ initData: null, user: null, characters: [], isInitialized: false });
                 console.error('Initial data fetch failed:', error);
                 throw error;
             } finally {
@@ -70,5 +70,5 @@ export const useInitialDataStore = create<InitialDataState>((set, get) => ({
 }));
 
 export const useUser = () => useInitialDataStore((state) => state.user);
-export const useCharacter = () => useInitialDataStore((state) => state.character);
+export const useCharacters = () => useInitialDataStore((state) => state.characters);
 

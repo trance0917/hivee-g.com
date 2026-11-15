@@ -16,7 +16,7 @@ class ChatMessage implements ShouldBroadcast
 
     /**
      * @param array<int, string> $channels
-     * 例: ['chat.global'] / ['chat.character.12', 'chat.character.34']
+     * 例: ['chat.global'] / ['chat.user.12', 'chat.user.34']
      */
     public function __construct(
         public ChatMessageModel $chatMessage,
@@ -46,9 +46,9 @@ class ChatMessage implements ShouldBroadcast
             'id' => $this->chatMessage->id,
             'type' => (int) $this->chatMessage->getRawOriginal('type'),
             'user_id' => $this->chatMessage->user_id,
-            'character_id' => $this->chatMessage->character_id,
-            'sender_character_text_id' => $this->chatMessage->sender_character_text_id,
-            'recipient_character_text_id' => $this->chatMessage->recipient_character_text_id,
+            'sender_user_text_id' => $this->chatMessage->sender_user_text_id,
+            'recipient_user_id' => $this->chatMessage->recipient_user_id,
+            'recipient_user_text_id' => $this->chatMessage->recipient_user_text_id,
             'message' => $this->chatMessage->message,
             'created_at' => $this->chatMessage->created_at?->toIso8601String(),
         ];

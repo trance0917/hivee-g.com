@@ -7,7 +7,7 @@ export default function ChatTest() {
 
     useEffect(() => {
         // パブリックチャンネルを購読してメッセージを待ち受ける
-        window.Echo.channel('public-chat')
+        window.Echo.channel('chat.global')
             .listen('.chat-message', (e: { message: string }) => {
                 console.log('受け取ったぞ！', e);
                 setMessages(prev => [...prev, e.message]);
@@ -15,7 +15,7 @@ export default function ChatTest() {
 
         // コンポーネントが消えるときにチャンネルから抜ける
         return () => {
-            window.Echo.leaveChannel('public-chat');
+            window.Echo.leaveChannel('chat.global');
         };
     }, []);
 

@@ -16,6 +16,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -67,7 +68,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'active_character_id' => 'integer',
+            'village_id' => 'integer',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
@@ -84,9 +85,16 @@ class User extends Authenticatable
         });
     }
 
-    public function activeCharacter(): BelongsTo
+    // ユーザーの所属村。妖精の滞在村とは別の概念。
+    public function village(): BelongsTo
     {
-        return $this->belongsTo(Character::class, 'active_character_id');
+        return $this->belongsTo(Village::class);
+    }
+
+    /** 妖精はユーザーが保有する複数の採集要員。 */
+    public function characters(): HasMany
+    {
+        return $this->hasMany(Character::class);
     }
 
     public function user_social_accounts()

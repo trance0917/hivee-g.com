@@ -6,15 +6,15 @@ use App\Enums\ChatMessageType;
 use App\Events\ChatMessage as ChatMessageEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreChatMessageRequest;
-use App\Models\Character;
 use App\Models\ChatMessage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
- * 現段階で送信できるチャット: 所属村 (#本文)・全体 (**本文)・個人 (@公開キャラクターID 本文)。
- * それ以外を誤って全体チャットとして扱わない。
+ * チャット送信者とDM受信者はユーザー。村チャットは users.village_id で判定する。
+ * 現段階の送信形式: # 本文 / ** 本文 / @ユーザー公開ID 本文
  */
 class ChatController extends Controller
 {
@@ -22,16 +22,14 @@ class ChatController extends Controller
     {
         $user = $request->user('sanctum');
         $userId = $user?->id;
+        $villageId = $user?->village_id;
         $limit = 200;
 
-        // 送信時と同じく、操作中キャラクターの所属村のみを対象にする。
-        $activeCharacter = ($user && $user->active_character_id)
-            ? Character::query()->whereKey($user->active_character_id)->where('user_id', $userId)->first()
-            : null;
-        $villageId = $activeCharacter?->village_id;
+        // 旧DM行にはユーザー公開IDスナップショットがないため、関係をまとめて取得する。
+        $withUsers = ['user:id,text_id', 'recipient:id,text_id'];
 
-        // 各クエリを最新200件で打ち切ってから結合（既存インデックスを利用）。
         $global = ChatMessage::query()
+            ->with($withUsers)
             ->where('type', ChatMessageType::Global->value)
             ->orderByDesc('id')
             ->limit($limit)
@@ -39,6 +37,7 @@ class ChatController extends Controller
 
         $village = $villageId !== null
             ? ChatMessage::query()
+                ->with($withUsers)
                 ->where('type', ChatMessageType::VillageMember->value)
                 ->where('target_id', $villageId)
                 ->orderByDesc('id')
@@ -46,18 +45,11 @@ class ChatController extends Controller
                 ->get()
             : collect();
 
-        $characterIds = [];
         $messages = $global->concat($village);
 
         if ($userId !== null) {
-            $characterIds = Character::query()
-                ->where('user_id', $userId)
-                ->orderBy('slot')
-                ->pluck('id')
-                ->map(static fn ($id): int => (int) $id)
-                ->all();
-
             $sent = ChatMessage::query()
+                ->with($withUsers)
                 ->where('type', ChatMessageType::Direct->value)
                 ->where('user_id', $userId)
                 ->orderByDesc('id')
@@ -65,51 +57,60 @@ class ChatController extends Controller
                 ->get();
 
             $received = ChatMessage::query()
+                ->with($withUsers)
                 ->where('type', ChatMessageType::Direct->value)
                 ->where('recipient_user_id', $userId)
                 ->orderByDesc('id')
                 ->limit($limit)
                 ->get();
 
-            $messages = $global->concat($village)->concat($sent)->concat($received)
-                ->unique('id')
-                ->sortByDesc('id')
-                ->take($limit);
+            $messages = $messages->concat($sent)->concat($received);
         }
 
         return response()->json([
-            'messages' => $messages->sortBy('id')->values()->map(
-                fn (ChatMessage $message): array => $this->formatMessage($message)
-            ),
-            'character_ids' => $characterIds,
+            'messages' => $messages
+                ->unique('id')
+                ->sortByDesc('id')
+                ->take($limit)
+                ->sortBy('id')
+                ->values()
+                ->map(fn (ChatMessage $message): array => $this->formatMessage($message)),
             'village_id' => $villageId !== null ? (int) $villageId : null,
         ]);
     }
 
     public function store(StoreChatMessageRequest $request): JsonResponse
     {
-        // 入力形式・茶禁・宛先・送信キャラの所有権はFormRequestで検証済み。
         $user = $request->user();
         [
             'type' => $type,
             'body' => $body,
-            'sender' => $sender,
             'recipient' => $recipient,
         ] = $request->chatPayload();
 
-        $message = DB::transaction(function () use ($request, $user, $sender, $recipient, $type, $body): ChatMessage {
+        $message = DB::transaction(function () use ($request, $user, $recipient, $type, $body): ChatMessage {
+            // 所属村を移動する処理が将来追加されても、旧所属村への誤送信を防ぐ。
+            $villageId = null;
+            if ($type === ChatMessageType::VillageMember) {
+                $villageId = DB::table('users')->where('id', $user->id)
+                    ->lockForUpdate()->value('village_id');
+                if ($villageId === null) {
+                    throw ValidationException::withMessages([
+                        'message' => 'ユーザーの所属村が設定されていません。',
+                    ]);
+                }
+            }
+
             $message = new ChatMessage();
             $message->user_id = $user->id;
-            $message->character_id = $sender?->id;
-            $message->sender_character_text_id = $sender?->text_id;
+            $message->sender_user_text_id = $user->text_id;
             $message->type = $type;
             $message->target_id = match ($type) {
-                ChatMessageType::VillageMember => (int) $sender->village_id,
+                ChatMessageType::VillageMember => (int) $villageId,
                 default => null,
             };
-            $message->recipient_user_id = $recipient?->user_id;
-            $message->recipient_character_id = $recipient?->id;
-            $message->recipient_character_text_id = $recipient?->text_id;
+            $message->recipient_user_id = $recipient?->id;
+            $message->recipient_user_text_id = $recipient?->text_id;
             $message->origin_h3 = null;
             $message->message = $body;
             $message->ip_address = $request->ip();
@@ -119,14 +120,12 @@ class ChatController extends Controller
             return $message;
         });
 
-        // 配信チャンネルは入力値からではなく、検証済みDBレコードから構築する。
-        // 全体は公開、村とDMは非公開チャンネル。宛先は検証済みデータから構築する。
         $channels = match ($type) {
             ChatMessageType::Global => ['chat.global'],
             ChatMessageType::VillageMember => ['chat.village.'.$message->target_id],
             ChatMessageType::Direct => array_values(array_unique([
-                'chat.character.'.$sender->id,
-                'chat.character.'.$recipient->id,
+                'chat.user.'.$user->id,
+                'chat.user.'.$recipient->id,
             ])),
         };
 
@@ -141,9 +140,10 @@ class ChatController extends Controller
             'id' => $message->id,
             'type' => (int) $message->getRawOriginal('type'),
             'user_id' => $message->user_id,
-            'character_id' => $message->character_id,
-            'sender_character_text_id' => $message->sender_character_text_id,
-            'recipient_character_text_id' => $message->recipient_character_text_id,
+            // 新規送信はスナップショット、旧履歴のみ現在のユーザー公開IDにフォールバック。
+            'sender_user_text_id' => $message->sender_user_text_id ?? $message->user?->text_id,
+            'recipient_user_id' => $message->recipient_user_id,
+            'recipient_user_text_id' => $message->recipient_user_text_id ?? $message->recipient?->text_id,
             'message' => $message->message,
             'created_at' => $message->created_at?->toIso8601String(),
         ];
