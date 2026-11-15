@@ -1,47 +1,66 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Hivee — AI開発ガイド
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+> 更新日: 2026-11-15  
+> 根拠: 2026-11-05のソースZIP (`project-dump_20261105_224108.zip`) と開発者から提示されたゲーム構想  
+> 状態: 開発中のスナップショット。すべてのコード・仕様が完成しているわけではない。
 
-## Prerequisites
+## 最初に読む
 
-Verify that PHP and Composer are available:
+Hiveeの改修・調査・機能設計を依頼されたAIは、まずこのファイルを読み、作業内容に応じて次を参照すること。
 
-```sh
-php -v
-composer -V
-```
+1. [`docs/GAME_SPEC.md`](docs/GAME_SPEC.md) — 世界観、ゲームの目的、予定機能（**構想・要望**）
+2. [`docs/GAME_RULES.md`](docs/GAME_RULES.md) — 数値・記号・抽選などのルール（**確定度に注意**）
+3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — ZIPから確認した技術構成、主要ファイル、API、データモデル（**実装の観測事実**）
+4. [`docs/DECISIONS.md`](docs/DECISIONS.md) — 不整合、未決事項、実装状況、作業候補
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+チャットの最新の明示指示や、添付された最新コードがあれば、それを優先して確認する。ただし**仕様書とコードが食い違っても無断で片方を正解扱いしない**。差分を示し、今回の修正対象に関係する場合は確認する。
 
-macOS:
+## 何を作っているか
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
+Hivee（ハイビー）は、現実世界の地理情報にH3セルを重ねた、協力型の村育成ゲーム。神社・ランドマークなどを巡ってアイテムを集め、仲間と協力して村の「精霊樹」を育てる。キャラクターには狩猟・採集などの得意分野がある。**村同士の略奪や敵対的な資源争奪をゲームの中心にしない。**
 
-Windows PowerShell:
+## 現時点の技術スタック
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
+- バックエンド: PHP `^8.5`, Laravel `^13.17`
+- フロントエンド: React `^19.2.8`、TypeScript/TSX（実際のソースから確認）、React Router 7、Vite 8、Tailwind CSS 4
+- 地図: MapLibre GL 6、`h3-js` 4
+- 状態: Zustand 5、TanStack React Query 5（**導入は確認済み、ルートProviderは現状コメントアウト**）
+- 通信: Axios、Laravel Reverb / Echo / Pusher JS
+- PHP検査: Pint、Larastan、PHPUnit（依存宣言に存在）
 
-Linux:
+バージョンは `composer.json` / `package.json` に書かれた**制約**。lockファイルがなければ厳密な導入バージョンは断定しない。
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
+## 開発時の原則
 
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
+- 変更前に関連するソース・ルート・Model・migration・フロント呼出元を確認する。
+- **実装済み / 部分実装・試作 / 構想のみ / 未確認**を明示的に区別する。
+- ゲーム内通貨、報酬、移動、権限、取引の最終判定はサーバー側で行うよう設計する。フロントの値を信用しない。
+- 現状の `resources/js/pages/world/` を尊重し、MapLibreのライフサイクル、H3計算、Zustandの画面状態を適切に分離する。
+- TanStack React Queryはサーバーデータ、Zustandは画面・一時状態を基本とし、**実際に使用する際はProvider設定と既存初期化の重複を確認する**。
+- LaravelのControllerを無理に肥大化させず、複雑な計算・取引は責務を分離する。ただし試作段階で過剰な抽象化を強制しない。
+- 冪等性、同時処理、認可、レート制限、性能、地理・H3の境界条件を確認する。
+- 既存のAPI名、イベント名、DBカラム名は、誤字らしく見えても使用箇所を確認するまで**勝手に変更しない**。
+- 実行していないテスト、未検証の環境構成、存在を確認していないファイルについては正直に明示する。
+- 変更により仕様が確定・変更された場合は、関連する `docs/*.md` の更新も提案する。
 
-## Agent Setup
+## 回答の標準形
 
-Install Laravel Boost from the application root before making application changes:
+1. 結論と、参照できたファイル名
+2. 現状と仕様上の位置付け（確定 / 試作 / 未定）
+3. 変更方針とその理由
+4. 修正ファイル・コード・必要なmigration/API変更
+5. 動作確認・テスト・影響範囲
+6. 仕様書に反映すべき決定事項
 
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
+簡単な質問ではこの形式を簡略化してよい。差分で足りるときに無関係な全ファイルを書き直さない。
 
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+## スナップショット固有の注意
+
+- 現行チャット送信APIで確認できる主要形式は `** 本文`（全体）と `@公開キャラクターID 本文`（DM）。その他のチャット種類はenumやDBに定義があっても、送信処理の完成を意味しない。
+- `villages` は現在、H3セルと地形を保持するテーブルとして使われる。**「セル」と「プレイヤーが育てる村」が同一概念かは要確認**。名称だけで同一視しない。
+- H3セルの表示・選択と、移動・収集・開拓のゲームロジックは異なる。地図が描画できても移動処理が完成しているとは言わない。
+- 調査対象ZIPには `.env`、DBファイル、公開ユーザー画像、ビルド済み成果物が含まれていた。外部AIに共有する前に除外する。`app/Console/Commands/ProjectDump.php` のZIP生成対象も見直す。詳細は `docs/DECISIONS.md`。
+
+## ZIPを新しいチャットへ渡すときの依頼例
+
+> Hiveeの開発途中の最新ソースです。まず `AGENTS.md` と作業に関係する `docs/*.md` を読んでください。設計資料とコードの差は区別し、今から依頼する変更に必要な箇所を確認してください。今回の相談: （具体的な相談を書く）
