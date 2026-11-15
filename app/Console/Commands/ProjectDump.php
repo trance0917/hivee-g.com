@@ -21,8 +21,8 @@ class ProjectDump extends Command
 
         $cmd = [
             'zip', '-r', $zip_path,
-            'app/', 'bootstrap/', 'config/', 'database/', 'public/', 'resources/', 'routes/',
-            '.env', 'composer.json', 'package.json', 'vite.config.js',
+            'app/', 'bootstrap/', 'config/', 'database/', 'docs/', 'public/', 'resources/', 'routes/',
+            'AGENTS.md', 'composer.json', 'package.json', 'tsconfig.json', 'vite.config.js',
         ];
 
         // LaravelのProcessファサードでスッキリ実行
