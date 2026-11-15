@@ -43,6 +43,15 @@ function messageKind(type: number): ChatKind {
     }
 }
 
+function formatSender(kind: ChatKind, sender: string): string {
+    switch (kind) {
+        case 'global': return `**${sender}`;
+        case 'village': return `#${sender}`;
+        case 'direct': return `@${sender}`;
+        default: return sender;
+    }
+}
+
 function mergeMessages(previous: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
     const byId = new Map<number, ChatMessage>();
     for (const message of previous) byId.set(message.id, message);
@@ -135,12 +144,9 @@ export default function ChatPanel() {
         };
     }, [user?.id, user?.village_id]);
 
-    const toggleKind = (kind: ChatKind) => {
-        setVisibleKinds((previous) =>
-            previous.includes(kind)
-                ? previous.filter((value) => value !== kind)
-                : [...previous, kind],
-        );
+    // 単一選択。選択中の種類を再度押してもOFFにはしない。
+    const selectKind = (kind: ChatKind) => {
+        setVisibleKinds([kind]);
     };
 
     const send = async (event: FormEvent<HTMLFormElement>) => {
@@ -169,20 +175,20 @@ export default function ChatPanel() {
             <div className="absolute right-[5px] top-[-17px] bg-white/70 p-[4px] border rounded-[5px] border-yellow-300/70 flex flex-wrap gap-[5px]" aria-label="チャットの表示フィルター">
                 <button
                     type="button"
-                    onClick={() => setVisibleKinds(allSelected ? [] : KINDS)}
+                    onClick={() => setVisibleKinds(KINDS)}
                     aria-pressed={allSelected}
-                    title="すべて表示 / 非表示"
-                    aria-label="すべて表示 / 非表示"
+                    title="すべて表示"
+                    aria-label="すべて表示"
                     className={`grid h-[18px] w-[18px] place-items-center rounded-full border border-slate-300 bg-slate-400 text-[8px] text-white ${allSelected ? 'opacity-100' : 'opacity-40'}`}
                 >All</button>
                 {KINDS.map((kind) => (
                     <button
                         key={kind}
                         type="button"
-                        title={`${CHAT_TYPES[kind].label}チャットを表示/非表示`}
-                        aria-label={`${CHAT_TYPES[kind].label}チャットを表示/非表示`}
+                        title={`${CHAT_TYPES[kind].label}チャットのみ表示`}
+                        aria-label={`${CHAT_TYPES[kind].label}チャットのみ表示`}
                         aria-pressed={visibleKinds.includes(kind)}
-                        onClick={() => toggleKind(kind)}
+                        onClick={() => selectKind(kind)}
                         className={`h-[18px] w-[18px] rounded-full border-2 border-white/40 ${CHAT_TYPES[kind].dot} ${visibleKinds.includes(kind) ? 'opacity-100' : 'opacity-40'}`}
                     />
                 ))}
@@ -195,7 +201,7 @@ export default function ChatPanel() {
                     const sender = message.sender_user_text_id ?? `ユーザー${message.user_id}`;
                     return (
                         <p key={message.id} className={`break-words ${CHAT_TYPES[kind].color}`}>
-                            <span className="font-medium">{sender}：</span>
+                            <span className="font-medium">{formatSender(kind, sender)}：</span>
                             {kind === 'direct' && message.recipient_user_id !== null && (
                                 <span className="font-medium">@{message.recipient_user_text_id ?? `ユーザー${message.recipient_user_id}`} </span>
                             )}
