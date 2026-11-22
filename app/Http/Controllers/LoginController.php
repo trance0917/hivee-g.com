@@ -102,6 +102,12 @@ final class LoginController extends Controller
         $user->api_token = Str::random(60);
         $user->save();
 
+        // 初回入村は地図から始める。認証前の戻り先はここで使い切る。
+        if ($user->village_id === null) {
+            $request->session()->forget('url.intended');
+            return redirect('/world')->with('is_first_time', $is_first_time);
+        }
+
         return redirect()->intended('/')->with('is_first_time', $is_first_time);
     }
 }

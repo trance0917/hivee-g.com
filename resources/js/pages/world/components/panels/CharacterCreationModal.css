@@ -1,0 +1,58 @@
+/* /worldのキャラクター作成モーダル。原画を背景として表示し、選択状態で色を切り替える。 */
+.character-dialog { width: min(1200px, 96vw); max-width: none; max-height: 94dvh; margin: auto; padding: 0; overflow: auto; border: 1px solid #c9ad77; border-radius: 22px; color: #fff5db; background: #363a2b; box-shadow: 0 25px 90px #0009; font-family: Georgia, 'Yu Mincho', serif; }
+.character-dialog::backdrop { background: #152019b3; backdrop-filter: blur(6px); }
+.character-scene { position: relative; min-height: 680px; isolation: isolate; background: radial-gradient(ellipse at 50% 25%, #68704c, #252d20 85%); }
+/* 原画の左右それぞれの表示範囲を指定する。画像ファイル自体は共通。 */
+.fairy-art { position: absolute; top: 0; bottom: 0; width: 36%; border: 0; background-image: url('/assets/images/characters/fairies.png'); background-size: auto 100%; background-repeat: no-repeat; filter: grayscale(1) brightness(.65); transition: filter .4s ease; cursor: pointer; mask-image: linear-gradient(to right, transparent, black 8%, black 88%, transparent); }
+.fairy-art.hunter { left: 0; background-position: 22% center; }
+.fairy-art.gatherer { right: 0; background-position: 77% center; }
+.fairy-art.selected { filter: grayscale(0) brightness(1); }
+.fairy-art:focus-visible { outline: 3px solid #ffe1a0; outline-offset: -5px; }
+.character-form { position: relative; width: 40%; margin: auto; padding: 45px 14px; text-align: center; background: linear-gradient(90deg, transparent, #252b20c9 15%, #252b20c9 85%, transparent); }
+.character-logo { width: 150px; margin: 0 auto 24px; }
+.character-form h2 { font-size: 23px; line-height: 1.6; font-weight: 600; }
+.character-form > p { margin: 20px 0; font-size: 15px; line-height: 1.8; }
+.character-choices { display: flex; gap: 14px; margin: 28px 0; border: 0; padding: 0; }
+.character-choice { position: relative; flex: 1; display: flex; align-items: center; flex-direction: column; gap: 6px; padding: 15px 8px; border: 2px solid #aa9169; border-radius: 15px; background: #eadbc1; color: #554532; cursor: pointer; }
+.character-choice.selected { border-color: #ffdf93; box-shadow: 0 0 18px #e4af53; background: #f8e9ca; }
+.character-choice input { position: absolute; top: 10px; left: 10px; accent-color: #785323; }
+.character-choice strong { font-size: 25px; font-weight: 500; }
+.character-choice > span:last-child { font-size: 12px; letter-spacing: .15em; }
+/* 原画の左上・右上のアイコンを、背景の位置指定で表示する。 */
+.specialty-icon { display: block; width: 55px; height: 62px; background-image: url('/assets/images/characters/fairies.png'); background-size: 1157px 870px; mix-blend-mode: multiply; }
+.specialty-icon.hunter { background-position: -21px -18px; }
+.specialty-icon.gatherer { background-position: -966px -18px; }
+.character-name { display: block; text-align: left; margin-bottom: 9px; }
+.character-input { display: flex; align-items: center; border: 1px solid #b69963; border-radius: 9px; background: #fff9ee; color: #443927; padding: 12px; }
+.character-input input { min-width: 0; width: 100%; background: transparent; outline-offset: 4px; font-family: inherit; font-size: 20px; }
+.character-input span { white-space: nowrap; font: 12px sans-serif; color: #7a705f; }
+.character-start { width: 100%; margin-top: 25px; padding: 17px 8px; border: 2px solid #e2bf79; border-radius: 12px; background: linear-gradient(#9b712d, #674418); box-shadow: inset 0 0 0 3px #fff2; font-size: 19px; cursor: pointer; }
+.character-start:disabled { opacity: .5; cursor: default; }
+@media (max-width: 700px) {
+ .character-scene { min-height: 820px; padding-top: 280px; }
+ .fairy-art { top: 0; bottom: auto; height: 340px; width: 50%; }
+ .character-form { width: 100%; padding: 25px 24px; background: linear-gradient(transparent, #293123 45px); }
+ .character-logo { width: 110px; margin-bottom: 15px; }
+ .character-form h2 { font-size: 20px; }
+ .character-choices { margin: 20px 0; }
+}
+@media (prefers-reduced-motion: reduce) { .fairy-art { transition: none; } }
+
+/* showModal()でopen属性が付いたとき、本体と背景を一緒にフェードインする。 */
+.character-dialog[open],
+.character-dialog[open]::backdrop {
+    animation: character-modal-fade-in 600ms ease-out both;
+}
+
+@keyframes character-modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* OSで動きを減らす設定を使っている場合は、アニメーションを省く。 */
+@media (prefers-reduced-motion: reduce) {
+    .character-dialog[open],
+    .character-dialog[open]::backdrop {
+        animation: none;
+    }
+}

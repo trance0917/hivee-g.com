@@ -32,8 +32,8 @@ class StoreChatMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 本文最大300文字 + 公開IDによる宛先指定の長さを許容。
-            'message' => ['required', 'string', 'max:100'],
+            // 本文最大100文字。@公開ID（最大255文字）等の宛先指定を含む入力全体は最大300文字。
+            'message' => ['required', 'string', 'max:300'],
         ];
     }
 
@@ -87,8 +87,8 @@ class StoreChatMessageRequest extends FormRequest
                     return;
                 }
 
-                if ($body === '' || mb_strlen($body) > 300) {
-                    $validator->errors()->add('message', '本文は1〜300文字で入力してください。');
+                if ($body === '' || mb_strlen($body) > 100) {
+                    $validator->errors()->add('message', '本文は1〜100文字で入力してください。');
                     return;
                 }
 

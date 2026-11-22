@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import type { RefObject } from 'react';
 import * as maplibregl from 'maplibre-gl';
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
@@ -15,10 +15,21 @@ import { addH3Layers, updateSelectedGrid, updateVisibleGrid } from '@/pages/worl
 import { attachRegisteredHexLayer } from '@/pages/world/map/registeredHexLayer';
 
 /** MapLibre初期化・H3描画・クリック操作・後片付けをひとまとめに。 */
-export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
+export function useWorldMap(container: RefObject<HTMLDivElement | null>, onVillagePick?: (hex: string) => void): void {
     const mapRef = useRef<maplibregl.Map | null>(null);
     const { registerMap } = useWorldMapController();
     const selectedHexes = useWorldStore((state) => state.selectedHexes);
+
+    // 地図を作り直さず、クリック時点の最新の入村状態に従って振り分ける。
+    const handleHexClick = useEffectEvent((hex: string) => {
+        if (onVillagePick) {
+            onVillagePick(hex);
+            return;
+        }
+        // イベント内ではgetState()を使い、古いReactクロージャを参照しない。
+        useWorldStore.getState().toggleHex(hex);
+        useWorldUIStore.getState().openWindow('hexInfo');
+    });
 
     useEffect(() => {
         if (!container.current || mapRef.current) return;
@@ -43,9 +54,7 @@ export function useWorldMap(container: RefObject<HTMLDivElement | null>): void {
         const onMoveEnd = () => updateVisibleGrid(map);
         const onMapClick = (e: maplibregl.MapMouseEvent) => {
             const hex = latLngToCell(e.lngLat.lat, e.lngLat.lng, H3_RESOLUTION);
-            // イベント内ではgetState()を使い、古いReactクロージャを参照しない。
-            useWorldStore.getState().toggleHex(hex);
-            useWorldUIStore.getState().openWindow('hexInfo');
+            handleHexClick(hex);
         };
         const onLoad = () => {
             addH3Layers(map);

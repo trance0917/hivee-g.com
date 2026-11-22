@@ -61,6 +61,7 @@ class Village extends Model
         ];
     }
 
+    // 村の地形コードに対応するマスタを参照する。村名が未設定ならこの地形名を表示する。
     public function terrain(): BelongsTo
     {
         return $this->belongsTo(Terrain::class, 'terrain_code', 'code');
