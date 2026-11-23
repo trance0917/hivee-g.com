@@ -1,57 +1,126 @@
-/* /worldのキャラクター作成モーダル。原画を背景として表示し、選択状態で色を切り替える。 */
-.character-dialog { width: min(1200px, 96vw); max-width: none; max-height: 94dvh; margin: auto; padding: 0; overflow: auto; border: 1px solid #c9ad77; border-radius: 22px; color: #fff5db; background: #363a2b; box-shadow: 0 25px 90px #0009; font-family: Georgia, 'Yu Mincho', serif; }
-/* 入村から妖精選択まで、ログイン画面と同じ明るさとぼかしで地図を覆う。 */
-.character-dialog::backdrop { background: rgb(255 255 255 / 25%); backdrop-filter: blur(4px); }
-.character-scene { position: relative; min-height: 680px; isolation: isolate; background: radial-gradient(ellipse at 50% 25%, #68704c, #252d20 85%); }
-/* 原画の左右それぞれの表示範囲を指定する。画像ファイル自体は共通。 */
-.fairy-art { position: absolute; top: 0; bottom: 0; width: 36%; border: 0; background-image: url('/assets/images/characters/fairies.png'); background-size: auto 100%; background-repeat: no-repeat; filter: grayscale(1) brightness(.65); transition: filter .4s ease; cursor: pointer; mask-image: linear-gradient(to right, transparent, black 8%, black 88%, transparent); }
-.fairy-art.hunter { left: 0; background-position: 22% center; }
-.fairy-art.gatherer { right: 0; background-position: 77% center; }
-.fairy-art.selected { filter: grayscale(0) brightness(1); }
-.fairy-art:focus-visible { outline: 3px solid #ffe1a0; outline-offset: -5px; }
-.character-form { position: relative; width: 40%; margin: auto; padding: 45px 14px; text-align: center; background: linear-gradient(90deg, transparent, #252b20c9 15%, #252b20c9 85%, transparent); }
-.character-logo { width: 150px; margin: 0 auto 24px; }
-.character-form h2 { font-size: 23px; line-height: 1.6; font-weight: 600; }
-.character-form > p { margin: 20px 0; font-size: 15px; line-height: 1.8; }
-.character-choices { display: flex; gap: 14px; margin: 28px 0; border: 0; padding: 0; }
-.character-choice { position: relative; flex: 1; display: flex; align-items: center; flex-direction: column; gap: 6px; padding: 15px 8px; border: 2px solid #aa9169; border-radius: 15px; background: #eadbc1; color: #554532; cursor: pointer; }
-.character-choice.selected { border-color: #ffdf93; box-shadow: 0 0 18px #e4af53; background: #f8e9ca; }
-.character-choice input { position: absolute; top: 10px; left: 10px; accent-color: #785323; }
-.character-choice strong { font-size: 25px; font-weight: 500; }
-.character-choice > span:last-child { font-size: 12px; letter-spacing: .15em; }
-/* 原画の左上・右上のアイコンを、背景の位置指定で表示する。 */
-.specialty-icon { display: block; width: 55px; height: 62px; background-image: url('/assets/images/characters/fairies.png'); background-size: 1157px 870px; mix-blend-mode: multiply; }
-.specialty-icon.hunter { background-position: -21px -18px; }
-.specialty-icon.gatherer { background-position: -966px -18px; }
-.character-name { display: block; text-align: left; margin-bottom: 9px; }
-.character-input { display: flex; align-items: center; border: 1px solid #b69963; border-radius: 9px; background: #fff9ee; color: #443927; padding: 12px; }
-.character-input input { min-width: 0; width: 100%; background: transparent; outline-offset: 4px; font-family: inherit; font-size: 20px; }
-.character-input span { white-space: nowrap; font: 12px sans-serif; color: #7a705f; }
-@media (max-width: 700px) {
- .character-scene { min-height: 820px; padding-top: 280px; }
- .fairy-art { top: 0; bottom: auto; height: 340px; width: 50%; }
- .character-form { width: 100%; padding: 25px 24px; background: linear-gradient(transparent, #293123 45px); }
- .character-logo { width: 110px; margin-bottom: 15px; }
- .character-form h2 { font-size: 20px; }
- .character-choices { margin: 20px 0; }
+/* 外枠は付けず、森と左右の妖精を一枚のシーンとして見せる。 */
+.character-dialog {
+    width: min(1200px, 96vw);
+    max-width: none;
+    max-height: 94dvh;
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: 12px;
+    color: #fff4dc;
+    background: #393747;
+    font-family: Georgia, 'Yu Mincho', serif;
 }
-@media (prefers-reduced-motion: reduce) { .fairy-art { transition: none; } }
+.character-dialog::backdrop { background: rgb(255 255 255 / 25%); backdrop-filter: blur(4px); }
+
+.character-scene {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 39%) 1fr;
+    grid-template-areas: ". heading ." ". choices ." ". details .";
+    align-content: center;
+    gap: clamp(16px, 2vw, 26px) 0;
+    min-height: clamp(540px, 56vw, 680px);
+    padding-block: 32px;
+    background:
+        linear-gradient(90deg, transparent 10%, #242037aa 32%, #25243bc9 50%, #3a3047aa 68%, transparent 90%),
+        linear-gradient(0deg, #222936aa, #735c7733 68%, #30354a88),
+        url('/assets/images/index/background.png') center / cover;
+}
+.character-heading { grid-area: heading; text-align: center; text-shadow: 0 2px 6px #1a1322; }
+.character-heading h2 { margin: 0; font-size: clamp(19px, 2.2vw, 29px); font-weight: 600; line-height: 1.5; }
+.character-heading h2:focus { outline: none; }
+.character-heading h2::after {
+    content: "";
+    display: block;
+    height: 1px;
+    width: 76%;
+    margin: 14px auto;
+    background: linear-gradient(90deg, transparent, #f6d497 40%, #fff4d5, #f6d497 60%, transparent);
+}
+.character-heading p { margin: 0; font-size: clamp(14px, 1.35vw, 17px); line-height: 1.75; }
+
+/* 原画はそのまま使い、内側の端を森へなじませる。未選択でも元の色を30%残す。 */
+.character-portraits { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.character-portrait {
+    position: absolute;
+    top: 0;
+    width: 34%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 24%;
+    mask-image: linear-gradient(to right, black 75%, transparent);
+}
+.character-portrait.hunter { left: 0; }
+.character-portrait.gatherer { right: 0; mask-image: linear-gradient(to left, black 75%, transparent); }
+.character-portrait, .character-choice img { filter: saturate(.3) brightness(.9); transition: filter .35s ease; }
+.character-portrait[data-selected="true"] { filter: none; }
+
+.character-choices {
+    grid-area: choices;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(8px, 1.5vw, 22px);
+    min-width: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.character-choice { position: relative; width: min(46%, 165px); cursor: pointer; }
+.character-choice img { display: block; width: 100%; height: auto; }
+.character-choice input:checked + img { filter: drop-shadow(0 0 9px #ffd686a6); }
+.character-choice input:focus-visible + img { outline: 2px solid #fff2c7; outline-offset: 3px; border-radius: 18%; }
+.character-choices:disabled .character-choice { cursor: default; }
+
+.character-details { grid-area: details; width: min(100%, 410px); margin-inline: auto; }
+.character-name { display: block; margin-bottom: 8px; font-size: 16px; text-shadow: 0 1px 4px #231b2a; }
+.character-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #ddb879;
+    border-radius: 14px;
+    padding: 11px 18px;
+    color: #49372a;
+    background: linear-gradient(110deg, #fffcf2, #f6eef1 70%, #f2e6d9);
+    box-shadow: inset 0 0 0 2px #fffbf1, 0 2px 10px #231b2a44;
+}
+.character-input:focus-within { outline: 2px solid #ffe3a8; outline-offset: 3px; }
+.character-input input { width: 100%; min-width: 0; background: transparent; outline: none; font: inherit; font-size: 18px; }
+.character-input span { flex: none; font-size: 14px; color: #695647; }
+.character-details [role="alert"] { margin: 10px 0 0; padding: 6px 10px; border-radius: 6px; color: #fff2e8; background: #552f31; }
+
+/* 縦長の画面は見出し、立ち絵、紋章、入力欄の順に並べる。 */
+@media (max-width: 700px) {
+    .character-scene {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "heading" "portraits" "choices" "details";
+        align-content: start;
+        gap: 0;
+        min-height: 0;
+        padding: 20px 0 24px;
+        background-position: center;
+    }
+    .character-heading, .character-details { padding-inline: 18px; }
+    .character-heading h2::after { margin: 8px auto; }
+    .character-portraits { position: relative; inset: auto; z-index: 0; grid-area: portraits; height: clamp(200px, 56vw, 278px); margin-top: 10px; }
+    .character-portrait { width: 50%; object-position: center 15%; }
+    .character-portraits { mask-image: linear-gradient(to bottom, transparent, black 9%, black 84%, transparent); }
+    .character-choices { position: relative; margin-top: -32px; gap: 18px; }
+    .character-choice { width: clamp(92px, 26vw, 125px); }
+    .character-details { margin-top: 14px; }
+}
 
 /* showModal()でopen属性が付いたとき、本体と背景を一緒にフェードインする。 */
-.character-dialog[open],
-.character-dialog[open]::backdrop {
-    animation: character-modal-fade-in 600ms ease-out both;
-}
-
-@keyframes character-modal-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+.character-dialog[open], .character-dialog[open]::backdrop { animation: character-modal-fade-in 600ms ease-out both; }
+@keyframes character-modal-fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* OSで動きを減らす設定を使っている場合は、アニメーションを省く。 */
 @media (prefers-reduced-motion: reduce) {
-    .character-dialog[open],
-    .character-dialog[open]::backdrop {
-        animation: none;
-    }
+    .character-portrait, .character-choice img { transition: none; }
+    .character-dialog[open], .character-dialog[open]::backdrop { animation: none; }
 }
