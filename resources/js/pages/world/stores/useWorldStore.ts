@@ -1,6 +1,4 @@
 import { create } from 'zustand';
-import { gridDisk, latLngToCell } from 'h3-js';
-import { H3_RESOLUTION, MAP_CENTER } from '@/pages/world/map/config';
 
 type WorldState = {
     selectedHexes: Set<string>;
@@ -10,12 +8,9 @@ type WorldState = {
     clearSelection: () => void;
 };
 
-// テスト版と同様、中心セルとその隣接セル（gridDisk(..., 1)）から開始。
-const centerHex = latLngToCell(MAP_CENTER.lat, MAP_CENTER.lng, H3_RESOLUTION);
-const initialHexes = new Set(gridDisk(centerHex, 0));
-
 export const useWorldStore = create<WorldState>((set) => ({
-    selectedHexes: initialHexes,
+    // 初回表示は未選択。プレイヤーが選んだセルにだけ選択色を重ねる。
+    selectedHexes: new Set<string>(),
     activeHex: null,
 
     toggleHex: (hex) => set((state) => {

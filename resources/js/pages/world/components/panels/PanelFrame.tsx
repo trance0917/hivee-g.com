@@ -16,7 +16,7 @@ export default function PanelFrame({ title, onClose, isCenterDecoration = false,
             <img className="absolute right-[-7px] top-1/2 -translate-y-1/2 w-[14px] pointer-events-none" src="/assets/images/decoration-side-1.png" alt=""/>
 
             {isCenterDecoration && (
-                <img className="absolute top-[-32px] left-1/2 -translate-x-1/2 w-[90px] pointer-events-none" src="/assets/images/decoration-b-top.png" alt=""/>
+                <img className="absolute top-[-25px] left-1/2 -translate-x-1/2 w-[70px] pointer-events-none" src="/assets/images/decoration-b-top.png" alt=""/>
             )}
 
             <img className="absolute bottom-[-10px] w-[100px] left-1/2 -translate-x-1/2 pointer-events-none" src="/assets/images/decoration-b-bottom.png" alt=""/>

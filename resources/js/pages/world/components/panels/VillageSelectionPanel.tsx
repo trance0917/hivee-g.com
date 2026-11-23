@@ -4,7 +4,8 @@ import PanelFrame from './PanelFrame';
 import { useInitialDataStore } from '@/stores/useInitialDataStore';
 
 // dialogはモーダル操作と配置を担当し、余白の内側にPanelFrameの外周装飾まで収める。
-const dialogClass = 'm-auto max-h-[96dvh] w-[min(96vw,27rem)] overflow-auto border-0 bg-transparent px-3 pt-9 pb-4 backdrop:bg-black/40';
+// 背後の地図には、ログインモーダルと同じ白25%と4pxのぼかしをかける。
+const dialogClass = 'm-auto max-h-[96dvh] w-[min(96vw,27rem)] overflow-auto border-0 bg-transparent px-3 pt-9 pb-4 backdrop:bg-white/25 backdrop:backdrop-blur-[4px]';
 
 type SelectionProps = { hex: string | null; onCancel: () => void };
 

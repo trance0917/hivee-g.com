@@ -1,6 +1,7 @@
 /* /worldのキャラクター作成モーダル。原画を背景として表示し、選択状態で色を切り替える。 */
 .character-dialog { width: min(1200px, 96vw); max-width: none; max-height: 94dvh; margin: auto; padding: 0; overflow: auto; border: 1px solid #c9ad77; border-radius: 22px; color: #fff5db; background: #363a2b; box-shadow: 0 25px 90px #0009; font-family: Georgia, 'Yu Mincho', serif; }
-.character-dialog::backdrop { background: #152019b3; backdrop-filter: blur(6px); }
+/* 入村から妖精選択まで、ログイン画面と同じ明るさとぼかしで地図を覆う。 */
+.character-dialog::backdrop { background: rgb(255 255 255 / 25%); backdrop-filter: blur(4px); }
 .character-scene { position: relative; min-height: 680px; isolation: isolate; background: radial-gradient(ellipse at 50% 25%, #68704c, #252d20 85%); }
 /* 原画の左右それぞれの表示範囲を指定する。画像ファイル自体は共通。 */
 .fairy-art { position: absolute; top: 0; bottom: 0; width: 36%; border: 0; background-image: url('/assets/images/characters/fairies.png'); background-size: auto 100%; background-repeat: no-repeat; filter: grayscale(1) brightness(.65); transition: filter .4s ease; cursor: pointer; mask-image: linear-gradient(to right, transparent, black 8%, black 88%, transparent); }
