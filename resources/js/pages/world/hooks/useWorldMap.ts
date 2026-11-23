@@ -8,7 +8,7 @@ import { useWorldMapController } from '@/pages/world/context/WorldMapContext';
 import { useWorldStore } from '@/pages/world/stores/useWorldStore';
 import { useWorldUIStore } from '@/pages/world/stores/useWorldUIStore';
 import {
-    H3_RESOLUTION, MAP_BEARING, MAP_CENTER, MAP_MAX_ZOOM,
+    H3_RESOLUTION, MAP_BEARING, MAP_MAX_ZOOM,
     MAP_MIN_ZOOM, MAP_PITCH, MAP_STYLE_URL, MAP_ZOOM,
 } from '@/pages/world/map/config';
 import { addH3Layers, updateSelectedGrid, updateVisibleGrid } from '@/pages/world/map/h3Grid';
@@ -17,7 +17,8 @@ import { attachRegisteredHexLayer } from '@/pages/world/map/registeredHexLayer';
 /** MapLibre初期化・H3描画・クリック操作・後片付けをひとまとめに。 */
 export function useWorldMap(container: RefObject<HTMLDivElement | null>, onVillagePick?: (hex: string) => void): void {
     const mapRef = useRef<maplibregl.Map | null>(null);
-    const { registerMap } = useWorldMapController();
+    const { registerMap, homeCenter } = useWorldMapController();
+    const centerRef = useRef(homeCenter);
     const selectedHexes = useWorldStore((state) => state.selectedHexes);
 
     // 地図を作り直さず、クリック時点の最新の入村状態に従って振り分ける。
@@ -31,13 +32,19 @@ export function useWorldMap(container: RefObject<HTMLDivElement | null>, onVilla
         useWorldUIStore.getState().openWindow('hexInfo');
     });
 
+    // 初回はこの座標で地図を生成し、入村確定時は表示中の地図の中心だけを更新する。
+    useEffect(() => {
+        centerRef.current = homeCenter;
+        mapRef.current?.setCenter(homeCenter);
+    }, [homeCenter]);
+
     useEffect(() => {
         if (!container.current || mapRef.current) return;
 
         const map = new maplibregl.Map({
             container: container.current,
             style: MAP_STYLE_URL,
-            center: [MAP_CENTER.lng, MAP_CENTER.lat],
+            center: centerRef.current,
             zoom: MAP_ZOOM,
             pitch: MAP_PITCH,
             bearing: MAP_BEARING,

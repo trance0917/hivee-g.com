@@ -10,6 +10,25 @@
     --font-sans: "Yu Mincho", "Hiragino Mincho ProN", serif;
 }
 
+/* ワールドの確定ボタンは、妖精選択で使用している金の縁と茶色のグラデーションに揃える。 */
+.world-primary-button {
+    width: 100%;
+    padding: 17px 8px;
+    border: 2px solid #e2bf79;
+    border-radius: 12px;
+    background: linear-gradient(#9b712d, #674418);
+    box-shadow: inset 0 0 0 3px #fff2;
+    color: #fff5db;
+    font-family: Georgia, 'Yu Mincho', serif;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+.world-primary-button:disabled {
+    opacity: .5;
+    cursor: default;
+}
+
 @layer base {
     button {
         cursor: pointer;

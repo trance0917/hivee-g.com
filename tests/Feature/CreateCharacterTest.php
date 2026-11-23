@@ -33,11 +33,13 @@ class CreateCharacterTest extends TestCase
             $table->string('hex_id')->unique();
             $table->string('name')->nullable();
             $table->string('terrain_code');
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
         });
         DB::table('terrains')->insert(['code' => 'plain', 'name' => '平地']);
         DB::table('villages')->insert([
-            ['id' => 8, 'hex_id' => '882e60eaa1fffff', 'name' => '若葉村', 'terrain_code' => 'plain'],
-            ['id' => 9, 'hex_id' => '882e60eaa3fffff', 'name' => null, 'terrain_code' => 'plain'],
+            ['id' => 8, 'hex_id' => '882e60eaa1fffff', 'name' => '若葉村', 'terrain_code' => 'plain', 'latitude' => 34.71, 'longitude' => 135.51],
+            ['id' => 9, 'hex_id' => '882e60eaa3fffff', 'name' => null, 'terrain_code' => 'plain', 'latitude' => 34.72, 'longitude' => 135.52],
         ]);
         Schema::create('characters', function (Blueprint $table) {
             $table->id();
@@ -84,7 +86,11 @@ class CreateCharacterTest extends TestCase
         $this->getJson($other)->assertOk()->assertJsonPath('name', '平地');
         $this->postJson('/api/villages/882e60eaa5fffff/join')->assertNotFound();
         $this->assertNull($user->fresh()->village_id);
-        $response = $this->postJson($other.'/join')->assertOk()->assertJsonPath('user.village_id', 9);
+        // 未所属のときは梅田を使い、入村後の初期データからは選んだ村の座標を取得できる。
+        $this->getJson('/api/initial-data')->assertOk()->assertJsonPath('user.village', null);
+        $response = $this->postJson($other.'/join')->assertOk()->assertJsonPath('user.village_id', 9)
+            ->assertJsonPath('user.village.latitude', 34.72)
+            ->assertJsonPath('user.village.longitude', 135.52);
         $this->assertSame($this->getJson('/api/initial-data')->json(), $response->json());
         $this->postJson($other.'/join')->assertOk();
         $this->postJson($village.'/join')->assertConflict();

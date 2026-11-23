@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import WorldIndex from '@/pages/world/Index';
 import LoginModal from '@/components/LoginModal';
+import ScreenLoading from '@/components/ApiLoading';
 import { useInitialDataStore } from '@/stores/useInitialDataStore';
 import ChatTest from './ChatTest';
 
@@ -94,6 +95,7 @@ export default function App() {
                     )}
                 </div>
             )}
+            <ScreenLoading />
         </BrowserRouter>
     );
 }

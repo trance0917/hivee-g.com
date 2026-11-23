@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useContext, useEffect, useRef, useState, type FormEvent } from 'react';
+import { PanelLoadingScope } from '@/stores/useApiLoading';
 import axios from 'axios';
 import { useUser } from '@/stores/useInitialDataStore';
 
@@ -89,6 +90,8 @@ function getErrorMessage(error: unknown): string {
 }
 
 export default function ChatPanel() {
+    // 履歴の取得と送信のどちらも、チャットを囲んでいるフレームに表示する。
+    const loadingScope = useContext(PanelLoadingScope);
     const user = useUser();
     const [visibleKinds, setVisibleKinds] = useState<ChatKind[]>(KINDS);
     const [timeline, setTimeline] = useState<TimelineItem[]>([]);
@@ -135,6 +138,7 @@ export default function ChatPanel() {
             setTimeline([]);
             try {
                 const { data } = await axios.get<ChatHistoryResponse>('/api/chat/messages', {
+                    loadingScope,
                     signal: controller.signal,
                 });
                 if (!active) return;
@@ -182,7 +186,7 @@ export default function ChatPanel() {
             if (villageChannel) echo.leave(villageChannel);
             if (userChannel) echo.leave(userChannel);
         };
-    }, [user?.id, user?.village_id]);
+    }, [user?.id, user?.village_id, loadingScope]);
 
     // 単一選択。選択中の種類を再度押してもOFFにはしない。
     const selectKind = (kind: ChatKind) => {
@@ -241,7 +245,7 @@ export default function ChatPanel() {
         try {
             const { data } = await axios.post<{ message: ChatMessage }>('/api/chat/send', {
                 message: text,
-            });
+            }, { loadingScope });
             setTimeline((previous) => appendMessages(previous, [data.message]));
             setInput('');
         } catch (err) {

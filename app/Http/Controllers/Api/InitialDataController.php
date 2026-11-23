@@ -14,6 +14,8 @@ class InitialDataController extends Controller
     {
         // 発言・所属村の主体はユーザー。操作中の単一妖精という概念はなくす。
         $user = User::select(['id', 'text_id', 'village_id', 'name', 'avatar'])
+            // 地図の初期位置にはユーザーの所属村の座標を使う。入村直後にも同じ形式で返す。
+            ->with('village:id,latitude,longitude')
             ->selectAccessor(['avatar_url'])
             ->find($request->user()?->id)
             ?->makeHidden(['avatar']);

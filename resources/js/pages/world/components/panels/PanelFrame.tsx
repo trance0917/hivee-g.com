@@ -1,13 +1,20 @@
-import {PropsWithChildren, useEffect} from 'react';
+import { useId, type PropsWithChildren } from 'react';
+import { LoadingSpinner } from '@/components/ApiLoading';
+import { PanelLoadingScope, useApiLoading } from '@/stores/useApiLoading';
 
 type Props = PropsWithChildren<{
     title?: string;
     onClose?: () => void;
     isCenterDecoration?: boolean;
+    loadingScope?: string;
 }>;
 
 /** 各パネルでスタイルを統一するための共通枠。配置位置は親コンポーネントで決定。 */
-export default function PanelFrame({ title, onClose, isCenterDecoration = false, children }: Props) {
+export default function PanelFrame({ title, onClose, isCenterDecoration = false, loadingScope, children }: Props) {
+    // 親が通信する場合はそのIDを受け取り、子からの通信にはContextで同じIDを渡す。
+    const frameId = useId();
+    const scope = loadingScope ?? frameId;
+    const loading = useApiLoading(scope);
     return (
         <section className="relative pointer-events-auto w-full rounded-[10px] border border-amber-200/80 bg-gradient-to-b from-[rgba(255,254,250,0.8)] to-[rgba(251,248,234,0.7)] p-[5px_5px] text-slate-800 shadow-lg backdrop-blur-[4px]
             before:pointer-events-none before:absolute before:inset-[2px] before:rounded-[7px] before:border before:border-[rgba(194,159,102,0.3)] before:content-['']
@@ -23,19 +30,28 @@ export default function PanelFrame({ title, onClose, isCenterDecoration = false,
             <img className="absolute top-[-7px] left-[-9px] w-[60px] pointer-events-none" src="/assets/images/decoration-b-corner-tl.png?" alt=""/>
             <img className="absolute right-[-7px] bottom-[-6px] w-[60px] pointer-events-none" src="/assets/images/decoration-b-corner-br.png" alt=""/>
 
-            {title && (
-                <header className="mb-[10px] flex items-center justify-between gap-[10px] border-b border-amber-200/70 pb-[8px]">
-                    <h2 className="text-sm font-semibold">{title}</h2>
-                </header>
-            )}
+            <PanelLoadingScope.Provider value={scope}>
+                <div inert={loading} aria-busy={loading} className={loading ? 'opacity-80' : undefined}>
+                    {title && (
+                        <header className="mb-[10px] flex items-center justify-between gap-[10px] border-b border-amber-200/70 pb-[8px]">
+                            <h2 className="text-sm font-semibold">{title}</h2>
+                        </header>
+                    )}
 
-            {onClose && (
-                <button type="button" onClick={onClose} aria-label={`${title}を閉じる`}
-                        className="absolute right-[8px] top-[8px] rounded px-[5px] py-[3px] text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900">
-                    ×
-                </button>
+                    {onClose && (
+                        <button type="button" onClick={onClose} aria-label={`${title}を閉じる`}
+                            className="absolute right-[8px] top-[8px] rounded px-[5px] py-[3px] text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+                            ×
+                        </button>
+                    )}
+                    {children}
+                </div>
+            </PanelLoadingScope.Provider>
+            {loading && (
+                <div className="absolute inset-0 z-50 grid place-items-center rounded-[inherit] cursor-wait">
+                    <LoadingSpinner />
+                </div>
             )}
-            {children}
         </section>
     );
 }

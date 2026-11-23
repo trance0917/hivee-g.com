@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import axios from 'axios';
 
 type InitialDataState = {
     initData: any | null;
@@ -44,8 +45,13 @@ export const useInitialDataStore = create<InitialDataState>((set, get) => ({
             set({ isLoading: true });
 
             try {
-                const res = await fetch('/api/initial-data', {
-                    credentials: 'same-origin',
+                const res = await axios.get('/api/initial-data', {
+                    // 初回取得と再試行の間はHiveeのロゴを表示する。
+                    loadingScope: false,
+                    // 500 などの通信失敗を正常終了として扱わない。
+                    validateStatus: (status) => status === 401 || (status >= 200 && status < 300),
+                    responseType: 'json',
+                    transitional: { silentJSONParsing: false },
                 });
 
                 // 未ログインを 401 で返すAPIにも対応（ログイン画面を表示できるようにする）。
@@ -54,16 +60,9 @@ export const useInitialDataStore = create<InitialDataState>((set, get) => ({
                     return;
                 }
 
-                // 500 などの通信失敗を正常終了として扱わない。
-                if (!res.ok) {
-                    throw new Error(`Initial data request failed: HTTP ${res.status}`);
-                }
-
-                const json = await res.json();
-
                 // get()で現在のストアから共通の保存関数を取り出す。
                 // 作成モーダルもこの関数を呼ぶため、初回取得と同じ状態に揃う。
-                get().setInitialData(json);
+                get().setInitialData(res.data);
             } catch (error) {
                 // エラー時は App に通知し、ローディングを勝手に解除しない。
                 set({ initData: null, user: null, characters: [], isInitialized: false });

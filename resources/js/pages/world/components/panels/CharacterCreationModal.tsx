@@ -5,8 +5,8 @@ import './CharacterCreationModal.css';
 
 // idはサーバーのCharacterSpecialty（1=狩猟、2=採集）に対応する。
 const choices = [
-    { id: 1, label: '狩猟系', english: 'Hunter', className: 'hunter' },
-    { id: 2, label: '採集系', english: 'Gatherer', className: 'gatherer' },
+    { id: 1, label: '狩猟系', art: 'hunter' },
+    { id: 2, label: '採集系', art: 'gatherer' },
 ];
 
 export default function CharacterCreationModal() {
@@ -71,25 +71,30 @@ function CreationForm() {
     return (
         // 作成が完了するまでEscキーで閉じない。
         <dialog ref={dialog} className="character-dialog" aria-labelledby="character-title" onCancel={(event) => event.preventDefault()}>
-            <div className="character-scene">
-                {choices.map((choice) => (
-                    <button key={choice.id} type="button" disabled={busy} className={`fairy-art ${choice.className} ${specialty === choice.id ? 'selected' : ''}`}
-                        aria-label={`${choice.label}を選択`} aria-pressed={specialty === choice.id} onClick={() => setSpecialty(choice.id)} />
-                ))}
-                <form className="character-form" onSubmit={submit}>
-                    <img className="character-logo" src="/assets/images/index/logo.png" alt="Hivee" />
-                    <h2 id="character-title">キャラクターを選択してください</h2>
+            <form className="character-scene" onSubmit={submit}>
+                <header className="character-heading">
+                    <h2 id="character-title" tabIndex={-1} autoFocus>キャラクターを選択してください</h2>
                     <p>あなたとともに、この世界を歩む<br />妖精を選び、名前をつけましょう。</p>
-                    <fieldset disabled={busy} className="character-choices">
-                        <legend className="sr-only">キャラクターの種類</legend>
-                        {choices.map((choice) => (
-                            <label key={choice.id} className={`character-choice ${specialty === choice.id ? 'selected' : ''}`}>
-                                <input type="radio" name="specialty" value={choice.id} checked={specialty === choice.id} onChange={() => setSpecialty(choice.id)} required />
-                                <span className={`specialty-icon ${choice.className}`} aria-hidden="true" />
-                                <strong>{choice.label}</strong><span>{choice.english}</span>
-                            </label>
-                        ))}
-                    </fieldset>
+                </header>
+                {/* 操作は中央の紋章に集約し、同じ選択状態を左右の立ち絵にも反映する。 */}
+                <div className="character-portraits" aria-hidden="true">
+                    {choices.map((choice) => (
+                        <img key={choice.id} alt="" width={440} height={760}
+                            className={`character-portrait ${choice.art}`} data-selected={specialty === choice.id}
+                            src={`/assets/images/characters/select-${choice.art}.png`} />
+                    ))}
+                </div>
+                <fieldset disabled={busy} className="character-choices">
+                    <legend className="sr-only">キャラクターの種類</legend>
+                    {choices.map((choice) => (
+                        <label key={choice.id} className="character-choice">
+                            <input className="sr-only" type="radio" name="specialty" value={choice.id} aria-label={choice.label}
+                                checked={specialty === choice.id} onChange={() => setSpecialty(choice.id)} required />
+                            <img alt="" width={448} height={526} src={`/assets/images/characters/select-emblem-${choice.art}.png`} />
+                        </label>
+                    ))}
+                </fieldset>
+                <div className="character-details">
                     <label className="character-name" htmlFor="character-name">キャラクター名</label>
                     <div className="character-input">
                         <input id="character-name" value={name} onChange={(event) => setName(event.target.value)} required disabled={busy} autoComplete="off" placeholder="名前を入力" aria-describedby="character-name-limit" />
@@ -97,11 +102,11 @@ function CreationForm() {
                     </div>
                     {length > 16 && <p role="alert">名前は16文字以内で入力してください。</p>}
                     {error && <p role="alert">{error}</p>}
-                    <button className="character-start" disabled={busy || !specialty || !name.trim() || length > 16}>
+                    <button className="world-primary-button mt-[25px]" disabled={busy || !specialty || !name.trim() || length > 16}>
                         {busy ? '作成しています…' : 'このキャラクターで始める'}
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </dialog>
     );
 }

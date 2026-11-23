@@ -27,8 +27,6 @@
 .character-input { display: flex; align-items: center; border: 1px solid #b69963; border-radius: 9px; background: #fff9ee; color: #443927; padding: 12px; }
 .character-input input { min-width: 0; width: 100%; background: transparent; outline-offset: 4px; font-family: inherit; font-size: 20px; }
 .character-input span { white-space: nowrap; font: 12px sans-serif; color: #7a705f; }
-.character-start { width: 100%; margin-top: 25px; padding: 17px 8px; border: 2px solid #e2bf79; border-radius: 12px; background: linear-gradient(#9b712d, #674418); box-shadow: inset 0 0 0 3px #fff2; font-size: 19px; cursor: pointer; }
-.character-start:disabled { opacity: .5; cursor: default; }
 @media (max-width: 700px) {
  .character-scene { min-height: 820px; padding-top: 280px; }
  .fairy-art { top: 0; bottom: auto; height: 340px; width: 50%; }

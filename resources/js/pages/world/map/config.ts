@@ -1,5 +1,6 @@
 /** Worldマップの共通設定。テスト版 MapSample.tsx の初期値を継承。 */
-export const MAP_CENTER = { lng: 135.456119, lat: 34.52478 } as const;
+// 所属村を選ぶまでは梅田を中心に表示する。
+export const MAP_CENTER = { lng: 135.486715, lat: 34.699549 } as const;
 export const MAP_ZOOM = 13;
 export const MAP_PITCH = 30;
 export const MAP_BEARING = -15;

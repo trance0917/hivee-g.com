@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import PanelFrame from './PanelFrame';
 import { useInitialDataStore } from '@/stores/useInitialDataStore';
@@ -36,7 +36,7 @@ export default function VillageSelectionPanel({ hex, onCancel }: SelectionProps)
                         地図の色がついたマスを選んで、所属する村を決めましょう。
                     </p>
                     <button type="button" onClick={() => setAcknowledged(true)}
-                        className="mt-5 rounded-lg bg-amber-900 px-6 py-2 text-white">
+                        className="world-primary-button mt-5">
                         了解
                     </button>
                 </div>
@@ -46,6 +46,8 @@ export default function VillageSelectionPanel({ hex, onCancel }: SelectionProps)
 }
 
 function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => void }) {
+    // 確認画面ごとのIDで、村情報の取得と入村を同じフレームに表示する。
+    const loadingScope = useId();
     const dialog = useRef<HTMLDialogElement>(null);
     const submitting = useRef(false);
     const [village, setVillage] = useState<{ name: string } | null>(null);
@@ -58,7 +60,7 @@ function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => v
         dialog.current?.showModal();
         const controller = new AbortController();
         // 確認画面を閉じた後に、古い候補の取得結果が表示されるのを防ぐ。
-        axios.get<{ name: string }>(url, { signal: controller.signal })
+        axios.get<{ name: string }>(url, { signal: controller.signal, loadingScope })
             .then(({ data }) => setVillage(data))
             .catch((cause) => {
                 if (controller.signal.aborted) return;
@@ -67,7 +69,7 @@ function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => v
                     : '村の情報を取得できませんでした。地図に戻って選び直してください。');
             });
         return () => controller.abort();
-    }, [url]);
+    }, [url, loadingScope]);
 
     async function join() {
         // 確定ボタンを押すまでは所属を保存しない。二重クリックは送信前に止める。
@@ -76,7 +78,7 @@ function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => v
         setBusy(true);
         setError('');
         try {
-            const { data } = await axios.post(url + '/join');
+            const { data } = await axios.post(url + '/join', undefined, { loadingScope });
             setInitialData(data);
         } catch (cause) {
             const status = axios.isAxiosError(cause) ? cause.response?.status : undefined;
@@ -102,7 +104,7 @@ function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => v
             className={dialogClass}>
             {/* 入村を送信している間だけ、フレームの閉じる操作を止める。 */}
             <div className="[&_header]:mx-5 [&_header]:mt-3 [&_header]:px-4 [&_h2]:break-all [&_h2]:text-lg">
-                <PanelFrame isCenterDecoration title={title} onClose={busy ? undefined : onCancel}>
+                <PanelFrame isCenterDecoration title={title} onClose={busy ? undefined : onCancel} loadingScope={loadingScope}>
                     <div className="px-6 pb-4">
                         {village && <p className="my-4">この村に入りますか？(移籍可能)</p>}
                         {!village && !error && <p role="status" className="my-4">村を確認しています…</p>}
@@ -110,7 +112,7 @@ function VillageConfirmation({ hex, onCancel }: { hex: string; onCancel: () => v
                         {village && (
                             <div className="mt-5 text-center">
                                 <button type="button" disabled={busy} onClick={join}
-                                    className="rounded-lg bg-amber-900 px-5 py-2 text-white disabled:opacity-60">
+                                    className="world-primary-button">
                                     {busy ? '入村中…' : '入村する'}
                                 </button>
                             </div>

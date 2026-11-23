@@ -1,4 +1,5 @@
 import { cellToBoundary, isValidCell } from 'h3-js';
+import axios from 'axios';
 import type { Map as MapLibreMap, GeoJSONSource } from 'maplibre-gl';
 import type { Feature, FeatureCollection, Polygon } from 'geojson';
 
@@ -86,13 +87,12 @@ export function attachRegisteredHexLayer(map: MapLibreMap): () => void {
 
     void (async () => {
         try {
-            const response = await fetch(API_URL, {
+            // 初回のセル取得中も地図を表示し、その上に全画面スピナーを重ねない。
+            const { data: raw } = await axios.get<unknown>(API_URL, {
+                loadingScope: false,
                 signal: controller.signal,
                 headers: { Accept: 'application/json' },
             });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-            const raw: unknown = await response.json();
             if (!Array.isArray(raw)) throw new Error('登録済みマスAPIは配列を返す必要があります');
 
             // 同一H3マスの重複排除。無効なH3は描画しない。
