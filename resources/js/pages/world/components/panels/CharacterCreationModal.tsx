@@ -31,6 +31,17 @@ function CreationForm() {
     const setInitialData = useInitialDataStore((state) => state.setInitialData);
     // Unicodeコードポイント数で数える。サーバーでも16文字上限を検証する。
     const length = Array.from(name).length;
+    const trimmedName = name.trim();
+    let nameError = '';
+    if (length > 16) {
+        nameError = '名前は16文字以内で入力してください。';
+    } else if (/^\p{Nd}+$/u.test(trimmedName)) {
+        // 作成APIと同じく、全角を含む十進数字だけの名前を弾く。
+        nameError = '数字だけの名前は使えません。';
+    } else if (trimmedName.includes('【GM】')) {
+        nameError = '【GM】はゲームマスター専用の表記です。';
+    }
+    const canSubmit = !busy && specialty !== null && trimmedName !== '' && !nameError;
 
     useEffect(() => {
         // ネイティブdialogで背景操作を抑え、キーボードのフォーカスを内側に保つ。
@@ -43,12 +54,12 @@ function CreationForm() {
 
     async function submit(event: React.FormEvent) {
         event.preventDefault();
-        if (submitting.current || !specialty || !name.trim() || length > 16) return;
+        if (submitting.current || !canSubmit) return;
         submitting.current = true;
         setBusy(true);
         setError('');
         try {
-            const { data } = await axios.post('/api/characters', { specialty, name: name.trim() });
+            const { data } = await axios.post('/api/characters', { specialty, name: trimmedName });
             // POST成功レスポンスは/api/initial-dataと同じ形式。
             // 全ページ共通のストアを更新すると、上の所有数判定も更新される。
             setInitialData(data);
@@ -97,12 +108,13 @@ function CreationForm() {
                 <div className="character-details">
                     <label className="character-name" htmlFor="character-name">キャラクター名</label>
                     <div className="character-input">
-                        <input id="character-name" value={name} onChange={(event) => setName(event.target.value)} required disabled={busy} autoComplete="off" placeholder="名前を入力" aria-describedby="character-name-limit" />
+                        <input id="character-name" value={name} onChange={(event) => setName(event.target.value)} required disabled={busy} autoComplete="off" placeholder="名前を入力"
+                            aria-invalid={Boolean(nameError)} aria-describedby={nameError ? 'character-name-limit character-name-error' : 'character-name-limit'} />
                         <span id="character-name-limit">{length} / 16</span>
                     </div>
-                    {length > 16 && <p role="alert">名前は16文字以内で入力してください。</p>}
+                    {nameError && <p id="character-name-error" role="alert">{nameError}</p>}
                     {error && <p role="alert">{error}</p>}
-                    <button className="world-primary-button mt-[25px]" disabled={busy || !specialty || !name.trim() || length > 16}>
+                    <button className="world-primary-button mt-[25px]" disabled={!canSubmit}>
                         {busy ? '作成しています…' : 'このキャラクターで始める'}
                     </button>
                 </div>

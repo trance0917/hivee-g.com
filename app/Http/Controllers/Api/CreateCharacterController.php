@@ -17,11 +17,20 @@ class CreateCharacterController extends Controller
         // ブラウザを経由しない送信にも備え、名前と種類をサーバーで検証する。
         // 名前のunique制約は付けず、同名の妖精を許可する。
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:16'],
+            // Unicodeの十進数字だけで構成された名前を拒否する（半角・全角の混在も対象）。
+            'name' => [
+                'bail', 'required', 'string', 'max:16', 'not_regex:/\A\p{Nd}+\z/u',
+                static function (string $attribute, string $value, \Closure $fail): void {
+                    if (str_contains($value, '【GM】')) {
+                        $fail('【GM】はゲームマスター専用の表記です。');
+                    }
+                },
+            ],
             'specialty' => ['required', Rule::enum(CharacterSpecialty::class)],
         ], [
             'name.required' => '名前を入力してください。',
             'name.max' => '名前は16文字以内で入力してください。',
+            'name.not_regex' => '数字だけの名前は使えません。',
             'specialty.required' => 'キャラクターを選択してください。',
             'specialty.enum' => 'キャラクターを選び直してください。',
         ]);

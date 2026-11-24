@@ -107,4 +107,27 @@ class CreateCharacterTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors('name');
         $this->assertDatabaseCount('characters', 0);
     }
+
+    public function test_names_made_entirely_of_decimal_digits_are_rejected(): void
+    {
+        $this->actingAs(User::create(['name' => 'test']));
+        $this->postJson('/api/villages/882e60eaa1fffff/join')->assertOk();
+        foreach (['0', '１２３', ' 1２3 ', '١٢٣'] as $name) {
+            $this->postJson('/api/characters', ['name' => $name, 'specialty' => 1])
+                ->assertUnprocessable()->assertJsonPath('errors.name.0', '数字だけの名前は使えません。');
+        }
+        $this->assertDatabaseCount('characters', 0);
+
+        foreach (['【GM】', '【GM】はち', 'はち【GM】'] as $reserved) {
+            $this->postJson('/api/characters', ['name' => $reserved, 'specialty' => 1])
+                ->assertUnprocessable()->assertJsonPath('errors.name.0', '【GM】はゲームマスター専用の表記です。');
+        }
+
+        foreach (['Hivee123', '小春２', 'ハイビー', 'こはる', '하이비', '妖精🌸'] as $name) {
+            $this->actingAs(User::create(['name' => $name]));
+            $this->postJson('/api/villages/882e60eaa1fffff/join')->assertOk();
+            $this->postJson('/api/characters', ['name' => $name, 'specialty' => 1])
+                ->assertOk()->assertJsonPath('characters.0.name', $name);
+        }
+    }
 }
