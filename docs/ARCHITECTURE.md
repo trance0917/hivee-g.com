@@ -1,6 +1,6 @@
 # Hivee — 技術構成・ソースコード案内
 
-> 調査日: 2026-11-15  
+> 初回調査日: 2026-11-15。初回プレイと通信表示は2026-11-24の作業ツリーで更新。  
 > 調査対象: `project-dump_20261115_144614.zip`。今回のコード変更後の差分も併記。  
 > この文書は**コードから確認した事実**を中心とする。推奨・改善案は区別して記す。  
 > 注意: ランタイム起動や実DB接続の動作検証は実施していない。
@@ -45,11 +45,46 @@ React ← Reverb/Echo ← Laravel Broadcast Event
 - `routes/web.php`: Google / X（twitter-oauth-2）/ LINEのSocialiteログイン・callbackを定義。
 - `app/Http/Controllers/LoginController.php`: SNSログイン後にユーザー・連携アカウントを取得／作成し、Laravel認証ログインする。
 - `app/Services/UserService.php`: SNS新規アカウントの生成、アバター保存の処理。
-- `GET /api/initial-data`: ユーザーの公開ID・所属村IDと、所有する妖精一覧 `characters[]` を返す（今回の未適用パッチ）。旧 `character` 単体フィールドは廃止。
-- `resources/js/stores/useInitialDataStore.ts`: 初期取得、重複通信防止、Zustandへの保存。
+- `GET /api/initial-data` は `user` と枠順の所有妖精一覧 `characters[]` を返す。所属村があれば `User::village()` から `user.village` に `id`、`latitude`、`longitude` を含める。ゲストの場合は `user: null` と空の一覧を返す。
+- `resources/js/stores/useInitialDataStore.ts` の `fetchInitialData()` は初回取得を担当する。同時に呼ばれても進行中のリクエストを共有する。`setInitialData(data)` は取得済みの応答を受け取り、全体の `initData` と画面が読む `user`・`characters` を一度に更新する。入村・妖精作成でも同じ関数を使うため、保存成功後に初期データをGETし直す必要はない。
 - `resources/js/App.tsx`: 初期データ取得完了まで画面遷移先の描画を待ち、スプラッシュを表示。
 
 **実装上の注意:** `resources/js/hooks/useInitialData.ts` にReact Queryを使う別フックが残っているが、`resources/js/main.tsx` の `QueryClientProvider` はコメントアウトされている。**React Queryがアプリ全体ですでに稼働しているとは言わないこと。**
+
+### 初回入村と妖精作成
+
+SNSログイン成功時、所属村が未設定なら `LoginController` が `/world` へ誘導する。所属済みなら通常のログイン後の遷移先を使う。ワールドを開いたときの表示は [ワールド画面](../resources/js/pages/world/Index.tsx) と [妖精作成モーダル](../resources/js/pages/world/components/panels/CharacterCreationModal.tsx) が初期データから決める。
+
+| ワールドを開いたユーザー | 表示 |
+|---|---|
+| ゲスト | 地図。入村と妖精作成の案内は表示しない |
+| ログイン済み・所属村なし | 妖精の所有数にかかわらず、村選択の案内 → マス選択 → 入村確認 |
+| 所属村あり・妖精0体 | 最初の妖精を選択し、名前を入力するモーダル |
+| 所属村あり・妖精1体以上 | 所属村を中心に通常のワールドを表示 |
+
+| 認証が必要なAPI | サーバーの処理 |
+|---|---|
+| `GET /api/villages/{hex_id}` | [VillageMembershipController](../app/Http/Controllers/Api/VillageMembershipController.php) が候補の名前を返す。`villages.name` がNULLなら `Village::terrain()`（`villages.terrain_code → terrains.code`）を経由して `terrains.name` を使う。未登録セルは404 |
+| `POST /api/villages/{hex_id}/join` | 認証ユーザーの行をロックし、選んだ村のIDを `users.village_id` に保存する。同じ村への再送は成功扱い。別の村に所属済みなら409 |
+| `POST /api/characters` | [CreateCharacterController](../app/Http/Controllers/Api/CreateCharacterController.php) が `name` と `specialty` を検証し、ユーザー行をロックして所有の有無を再確認する。所有済みなら追加せず、未所属のユーザーが新規作成しようとした場合は409 |
+
+両方のPOSTは保存後に [InitialDataController](../app/Http/Controllers/Api/InitialDataController.php) を呼ぶ。フロントが応答を `setInitialData` に渡すと、同じ `/world` 上で所属村・所有数の条件が再評価されて次の画面に切り替わる。
+
+[村選択パネル](../resources/js/pages/world/components/panels/VillageSelectionPanel.tsx) は案内と確認の両方に `PanelFrame` を使う。「了解」で地図を操作可能にし、候補を閉じる「×」では所属を保存しない。背面はログイン画面と同じ白25%・ぼかし4px。「了解」「入村する」「このキャラクターで始める」は [共通ボタンのCSS](../resources/css/app.css) の `.world-primary-button` を使う。
+
+妖精作成画面には外枠やロゴを置かず、見出しを上部、名前欄と確定ボタンを紋章の下に置く。素材は `public/assets/images/characters/` の `select-hunter.png`・`select-gatherer.png`（立ち絵）と `select-emblem-hunter.png`・`select-emblem-gatherer.png`（選択用の紋章）。中央の紋章はラジオボタンとして操作でき、対応する立ち絵と選択状態を共有する。[専用CSS](../resources/js/pages/world/components/panels/CharacterCreationModal.css) が未選択時の彩度30%、選択時の発色、名前欄、狭い画面での配置を担当する。表示時のフェードは600msで、端末の「動きを減らす」設定時は省略する。
+
+### API通信中の表示
+
+Axiosの送信処理を [bootstrap.ts](../resources/js/bootstrap.ts) で包み、[useApiLoading.ts](../resources/js/stores/useApiLoading.ts) が表示先ごとの通信件数を管理する。同じ表示先で並行した通信がある間はスピナーを保ち、エラーやキャンセルでも終了した通信の分だけ件数を戻す。
+
+| Axiosの `loadingScope` | 表示と利用箇所 |
+|---|---|
+| フレームのID | [PanelFrame](../resources/js/pages/world/components/panels/PanelFrame.tsx) 自身が枠内だけを覆い、内容を不透明度0.8にして操作を止める。村の確認・入村は親から同じIDを渡し、チャットの履歴取得・送信はフレームのContextからIDを受け取る |
+| 指定なし | `App.tsx` に1つ置いた [ScreenLoading](../resources/js/components/ApiLoading.tsx) が全画面を白25%・ぼかし4pxで覆う。妖精の作成送信が該当する。スピナーはパネルと共通 |
+| `false` | 起動時の `/api/initial-data` と、地図の初回描画用の `/api/get-registed-villages` で使用。前者はHiveeロゴを表示し、後者は地図の上に全画面スピナーを重ねない |
+
+2026-11-24の [public/index.php](../public/index.php) に、動作確認用の固定遅延（0.5秒）は入っていない。
 
 ## 3. マップ機能の構造
 
@@ -69,7 +104,8 @@ React ← Reverb/Echo ← Laravel Broadcast Event
 ### 観測済みの挙動
 
 - 現在のH3解像度設定は `8`（`config.ts`）。
-- 地図のクリックで座標をH3セルIDへ変換し、Zustandの選択状態を更新する。
+- 所属村がなければ梅田（緯度 `34.699549`、経度 `135.486715`）、あれば初期データの所属村座標を中心に開く。視点リセットも同じ中心に戻る。入村で中心が変わると `useWorldMap` が既存の地図の視点を更新する。
+- 初回の選択集合は空で、登録済みセルには地形色だけが付く。クリック座標からH3セルIDを求め、初回入村中は確認用の候補、通常時はZustandのセル選択として扱う。
 - 選択したセルはGeoJSONソース `hex-grid`、レイヤー `hex-fill` で表示される。
 - 登録済みセルは `GET /api/get-registed-villages` を使い、ソース `registered-hex` と塗り・輪郭レイヤーを追加する。**`registed` の綴りは現行のAPI契約に存在するので勝手に変更しない。**
 - 地図が破棄されるときにイベント解除・API abort・`map.remove()` の処理がある。
@@ -84,7 +120,7 @@ React ← Reverb/Echo ← Laravel Broadcast Event
 - `VillageController::getRegistedVillages()` が登録済みマスを描画用JSONに整形して返す。
 - `VillageController::saveVillages()` は存在するが、**このZIPのroutes/api.phpにはルート登録が見当たらない**。DB登録画面・動作中の書込APIがあるとは断定しない。
 
-**現在のゲーム方針:** H3セル1個を村1つの単位とし、居住可能な村それぞれに精霊樹を設ける。`villages` は現時点ではH3セル情報として利用されており、住民票登録・精霊樹更新のAPIは未実装。
+H3セル1個を村1つの単位とし、登録済みセルから初回の所属村を選べる。地形ごとの居住条件、村の移籍、精霊樹の更新は今後の対応。
 
 ## 4. チャット機能の構造
 
@@ -134,6 +170,17 @@ React ← Reverb/Echo ← Laravel Broadcast Event
 | `Notification` | ユーザー通知（Model・migrationあり） |
 
 ### 主なDBスキーマ
+
+#### 接続先のDDLを取得する
+
+プロジェクト直下で `php artisan schema:export` を実行すると、Laravelのデフォルト接続からテーブル定義を取得し、[database/schema/current_schema.sql](../database/schema/current_schema.sql) に保存する。local・testing・production のどの環境でも手動で実行できる。調査時には、このSQLがどの接続先で最後に生成されたかを確認する。
+
+- HiveeのMySQL／MariaDB接続では `SHOW CREATE TABLE` を使用する。カラム、主キー・外部キー、インデックス、カラムコメント、テーブルコメントがDBの定義どおりに入る。
+- テスト用SQLite接続ではテーブルと明示的なインデックスのDDLを取得する。SQLiteにMySQL形式のカラムコメント・テーブルコメントはない。
+- 出力対象はテーブル構造で、レコード（migration履歴を含む）、ビュー、トリガー、ストアドルーチンは含まない。コマンドが接続先で行うのは定義の読み取りだけ。
+- 定義取得と一時ファイルへの書き込みが完了した時点で既存のSQLを置き換える。エラー時は失敗の終了コードを返し、前回のファイルを保持する。
+
+#### 主なテーブル
 
 - `characters`: `id`（内部ID）、`user_id`、`slot`（ユーザー×枠にunique）、`specialty`、`village_id`（妖精の**滞在村**）。今回の差分migrationで旧 `text_id` を削除する。`village_id` の列名・FK・現行のNULL可否は維持し、DBコメントを「滞在村」に変更する。
 - `users`: **今回追加 `village_id`（nullable、villages参照）**。`users.text_id` は既存の公開IDでDMの宛先となる。旧 `active_character_id` は今回の差分migrationでFKごと削除する。
@@ -190,7 +237,7 @@ vite.config.js                          # Vite / alias @ / TLS等
 
 ### 今回のゲーム設計と現行データ構造の差分（2026-11-15）
 
-**今回の未適用コードパッチに含めた範囲:** `users.village_id`、`chat_messages` ユーザー公開ID控え、ユーザー主体の送受信・Channel/UI、旧キャラクター主体列の削除、`characters.village_id` コメント変更、初期データの `characters[]` 返却、Zustandの複数妖精保持。ユーザーの所属村を設定／変更するUI・API、移動、倉庫、採集、奉納、購入は未実装。
+**11月15日時点のパッチの範囲:** `users.village_id`、`chat_messages` ユーザー公開ID控え、ユーザー主体の送受信・Channel/UI、旧キャラクター主体列の削除、`characters.village_id` コメント変更、初期データの `characters[]` 返却、Zustandの複数妖精保持。当時は所属村の登録・変更、移動、倉庫、採集、奉納、購入のUI・APIは未実装だった。その後、初回の所属村登録を実装した。
 
 - **ユーザーの所属村:** `users.village_id`。`villages.id` に外部キー。既存レコードはNULLで開始し、ユーザーの意思確認なしの自動割当はしない。
 - **妖精の滞在村:** `characters.village_id` を既存名のまま使用（列コメントのみ「滞在村」に更新）。移動管理は未完成。`Character::stayVillage()` relationを追加。既に適用された2026-11-05の作成migrationは書き換えない。
@@ -206,7 +253,7 @@ vite.config.js                          # Vite / alias @ / TLS等
 ## 8. 実装時に優先して確認したい具体箇所
 
 1. **今回対応済み（コード上）** — 未対応チャット形式をエラーにする、本文上限を1〜300文字へ統一、都道府県記号コメントを `*` へ整理。
-2. **未対応** — ユーザー所属村の登録UI／移動時間／村移籍を伴うチャンネル切替。倉庫はユーザー所有のため村移籍時に在庫を移すデータ処理は不要だが、移籍中の回収・奉納可否は未決定。
+2. **初回の所属村登録は実装済み**。移動時間・村移籍を伴うチャンネル切替は未対応。倉庫はユーザー所有のため村移籍時に在庫を移すデータ処理は不要だが、移籍中の回収・奉納可否は未決定。
 3. **要確認** — 旧 `users.village_id` 欠損データの設定方法、データ移行後の村チャット利用可否。
 4. `app/Http/Controllers/Api/VillageController.php` — `saveVillages()` 内でtransaction外とtransaction内の**2回のupsert**があるように見える。保存API登録の有無も確認。
 5. `resources/js/main.tsx` — React QueryのProviderがコメントアウト。`useInitialData` とZustand初期データ取得の二重系統を整理する余地。

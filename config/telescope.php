@@ -121,7 +121,8 @@ return [
     ],
 
     'ignore_commands' => [
-        //
+        // DDLの読み取り時に、Telescopeが実行履歴をDBへ書き込むのを防ぐ。
+        'schema:export',
     ],
 
     /*
