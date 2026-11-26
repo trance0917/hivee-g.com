@@ -26,7 +26,7 @@ class ChatController extends Controller
         $limit = 200;
 
         // 旧DM行にはユーザー公開IDスナップショットがないため、関係をまとめて取得する。
-        $withUsers = ['user:id,text_id', 'recipient:id,text_id'];
+        $withUsers = ['user:id,name,text_id', 'recipient:id,name,text_id'];
 
         $global = ChatMessage::query()
             ->with($withUsers)
@@ -74,7 +74,7 @@ class ChatController extends Controller
                 ->take($limit)
                 ->sortBy('id')
                 ->values()
-                ->map(fn (ChatMessage $message): array => $this->formatMessage($message)),
+                ->map(fn (ChatMessage $message): array => $message->toChatPayload()),
             'village_id' => $villageId !== null ? (int) $villageId : null,
         ]);
     }
@@ -129,23 +129,9 @@ class ChatController extends Controller
             ])),
         };
 
+        $message->setRelation('user', $user)->setRelation('recipient', $recipient);
         broadcast(new ChatMessageEvent($message, $channels));
 
-        return response()->json(['message' => $this->formatMessage($message)], 201);
-    }
-
-    private function formatMessage(ChatMessage $message): array
-    {
-        return [
-            'id' => $message->id,
-            'type' => (int) $message->getRawOriginal('type'),
-            'user_id' => $message->user_id,
-            // 新規送信はスナップショット、旧履歴のみ現在のユーザー公開IDにフォールバック。
-            'sender_user_text_id' => $message->sender_user_text_id ?? $message->user?->text_id,
-            'recipient_user_id' => $message->recipient_user_id,
-            'recipient_user_text_id' => $message->recipient_user_text_id ?? $message->recipient?->text_id,
-            'message' => $message->message,
-            'created_at' => $message->created_at?->toIso8601String(),
-        ];
+        return response()->json(['message' => $message->toChatPayload()], 201);
     }
 }

@@ -38,8 +38,8 @@ function CreationForm() {
     } else if (/^\p{Nd}+$/u.test(trimmedName)) {
         // 作成APIと同じく、全角を含む十進数字だけの名前を弾く。
         nameError = '数字だけの名前は使えません。';
-    } else if (trimmedName.includes('【GM】')) {
-        nameError = '【GM】はゲームマスター専用の表記です。';
+    } else if (trimmedName.includes('[GM]')) {
+        nameError = '[GM]はゲームマスター専用の表記です。';
     }
     const canSubmit = !busy && specialty !== null && trimmedName !== '' && !nameError;
 

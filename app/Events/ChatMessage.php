@@ -42,15 +42,6 @@ class ChatMessage implements ShouldBroadcast
     /** IPアドレスやUser-Agent等の管理情報は配信しない。 */
     public function broadcastWith(): array
     {
-        return [
-            'id' => $this->chatMessage->id,
-            'type' => (int) $this->chatMessage->getRawOriginal('type'),
-            'user_id' => $this->chatMessage->user_id,
-            'sender_user_text_id' => $this->chatMessage->sender_user_text_id,
-            'recipient_user_id' => $this->chatMessage->recipient_user_id,
-            'recipient_user_text_id' => $this->chatMessage->recipient_user_text_id,
-            'message' => $this->chatMessage->message,
-            'created_at' => $this->chatMessage->created_at?->toIso8601String(),
-        ];
+        return $this->chatMessage->toChatPayload();
     }
 }

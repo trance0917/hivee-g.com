@@ -19,10 +19,10 @@ class CreateCharacterController extends Controller
         $data = $request->validate([
             // Unicodeの十進数字だけで構成された名前を拒否する（半角・全角の混在も対象）。
             'name' => [
-                'bail', 'required', 'string', 'max:16', 'not_regex:/\A\p{Nd}+\z/u',
+                'bail', 'required', 'string', 'max:16', 'regex:/\A[\p{L}\p{Nd}]+\z/u', 'not_regex:/\A\p{Nd}+\z/u',
                 static function (string $attribute, string $value, \Closure $fail): void {
-                    if (str_contains($value, '【GM】')) {
-                        $fail('【GM】はゲームマスター専用の表記です。');
+                    if (str_contains($value, '[GM]')) {
+                        $fail('[GM]はゲームマスター専用の表記です。');
                     }
                 },
             ],
@@ -30,6 +30,7 @@ class CreateCharacterController extends Controller
         ], [
             'name.required' => '名前を入力してください。',
             'name.max' => '名前は16文字以内で入力してください。',
+            'name.regex' => '名前に記号・絵文字・空白は使用できません。',
             'name.not_regex' => '数字だけの名前は使えません。',
             'specialty.required' => 'キャラクターを選択してください。',
             'specialty.enum' => 'キャラクターを選び直してください。',

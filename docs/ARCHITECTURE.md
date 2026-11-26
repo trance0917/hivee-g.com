@@ -120,7 +120,7 @@ Axiosの送信処理を [bootstrap.ts](../resources/js/bootstrap.ts) で包み�
 - `VillageController::getRegistedVillages()` が登録済みマスを描画用JSONに整形して返す。
 - `VillageController::saveVillages()` は存在するが、**このZIPのroutes/api.phpにはルート登録が見当たらない**。DB登録画面・動作中の書込APIがあるとは断定しない。
 
-H3セル1個を村1つの単位とし、登録済みセルから初回の所属村を選べる。地形ごとの居住条件、村の移籍、精霊樹の更新は今後の対応。
+H3セル1個を村1つの単位とし、登録済みセルの地形で初回入村の可否を判定する。候補取得APIは `terrains.is_developable` が真のときだけ `can_join: true` を返す。入村APIも保存前に再判定し、入村不可なら422を返す。村の移籍、精霊樹の更新は今後の対応。
 
 ## 4. チャット機能の構造
 
@@ -149,7 +149,7 @@ H3セル1個を村1つの単位とし、登録済みセルから初回の所属�
 - 村チャットは**`users.village_id`** に基づく `chat.village.{villageId}`。キャラクターの滞在村とは独立。
 - 新しいメッセージは `sender_user_text_id` / `recipient_user_text_id` をスナップショット保存。今回の新migrationで旧キャラクター送受信4カラムを削除する。旧DMの送受信ユーザーIDは維持する。
 - 過去のDMは `user_id` / `recipient_user_id` で閲覧でき、旧ユーザー公開IDスナップショットは復元されない。APIレスポンスは現在のユーザー公開IDを補完する。
-- フロントのChatPanelはユーザー単位のDMチャンネルを1つだけ購読し、表示名をキャラIDからユーザー公開IDへ変更。
+- ChatPanelはユーザー単位のDMチャンネルを1つ購読する。履歴・送信結果・リアルタイム配信では `users.name` を表示し、名前をタップすると相手の `@公開ID`（`users.text_id`）を入力する。送信済みDMには受信者名、受信DMには送信者名を表示する。
 - `GET /api/initial-data` に `user.text_id` / `user.village_id` を追加。旧ユーザー所属村の一括移行は実施せず、未設定ユーザーは村チャット不可。
 - DB/enumには8区分が存在するが、**未対応の種類を実装済みとは扱わない**。
 - Laravel実行環境でのDBマイグレーション・統合テストは未検証。

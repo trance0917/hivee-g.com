@@ -27,16 +27,18 @@ class CreateCharacterTest extends TestCase
         Schema::create('terrains', function (Blueprint $table) {
             $table->string('code')->primary();
             $table->string('name');
+            $table->boolean('is_developable')->nullable();
         });
         Schema::create('villages', function (Blueprint $table) {
             $table->id();
             $table->string('hex_id')->unique();
             $table->string('name')->nullable();
             $table->string('terrain_code');
+            $table->boolean('is_developable')->nullable();
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
         });
-        DB::table('terrains')->insert(['code' => 'plain', 'name' => '平地']);
+        DB::table('terrains')->insert(['code' => 'plain', 'name' => '平地', 'is_developable' => true]);
         DB::table('villages')->insert([
             ['id' => 8, 'hex_id' => '882e60eaa1fffff', 'name' => '若葉村', 'terrain_code' => 'plain', 'latitude' => 34.71, 'longitude' => 135.51],
             ['id' => 9, 'hex_id' => '882e60eaa3fffff', 'name' => null, 'terrain_code' => 'plain', 'latitude' => 34.72, 'longitude' => 135.52],
@@ -97,6 +99,22 @@ class CreateCharacterTest extends TestCase
         $this->assertSame(9, $user->fresh()->village_id);
     }
 
+    public function test_join_rechecks_terrain_permission_after_preview(): void
+    {
+        $user = User::create(['name' => 'test']);
+        $this->actingAs($user);
+        $village = '/api/villages/882e60eaa1fffff';
+        DB::table('villages')->where('id', 8)->update(['is_developable' => true]);
+        $this->getJson($village)->assertOk()->assertJsonPath('can_join', true);
+
+        foreach ([false, null] as $flag) {
+            DB::table('terrains')->where('code', 'plain')->update(['is_developable' => $flag]);
+            $this->postJson($village.'/join')->assertUnprocessable()->assertJsonPath('message', 'この村は入村できません');
+            $this->assertNull($user->fresh()->village_id);
+            $this->getJson($village)->assertOk()->assertJsonPath('name', '若葉村')->assertJsonPath('can_join', false);
+        }
+    }
+
     public function test_authentication_and_validation_are_required(): void
     {
         $this->postJson('/api/characters', [])->assertUnauthorized();
@@ -118,9 +136,9 @@ class CreateCharacterTest extends TestCase
         }
         $this->assertDatabaseCount('characters', 0);
 
-        foreach (['【GM】', '【GM】はち', 'はち【GM】'] as $reserved) {
+        foreach (['[GM]', '[GM]はち', 'はち[GM]'] as $reserved) {
             $this->postJson('/api/characters', ['name' => $reserved, 'specialty' => 1])
-                ->assertUnprocessable()->assertJsonPath('errors.name.0', '【GM】はゲームマスター専用の表記です。');
+                ->assertUnprocessable()->assertJsonPath('errors.name.0', '[GM]はゲームマスター専用の表記です。');
         }
 
         foreach (['Hivee123', '小春２', 'ハイビー', 'こはる', '하이비', '妖精🌸'] as $name) {

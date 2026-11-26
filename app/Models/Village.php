@@ -67,6 +67,12 @@ class Village extends Model
         return $this->belongsTo(Terrain::class, 'terrain_code', 'code');
     }
 
+    /** 初回入村には地形マスタの明示的な許可が必要。村個別の開発フラグは参照しない。 */
+    public function allowsInitialMembership(): bool
+    {
+        return $this->terrain?->is_developable === true;
+    }
+
     // ★モダンなアクセサ定義（Attribute クラスを使用）
     // getXxxAttribute() は古い書き方なのでこちらが推奨
     protected function canPass(): Attribute

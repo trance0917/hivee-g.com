@@ -14,7 +14,10 @@ class VillageMembershipController extends Controller
     public function show(Village $village): JsonResponse
     {
         // 名前のない村だけ、地形マスタから表示名を取得する。
-        return response()->json(['name' => $village->name ?? $village->terrain?->name]);
+        return response()->json([
+            'name' => $village->name ?? $village->terrain?->name,
+            'can_join' => $village->allowsInitialMembership(),
+        ]);
     }
 
     public function join(Request $request, Village $village, InitialDataController $initialData): JsonResponse
@@ -26,6 +29,11 @@ class VillageMembershipController extends Controller
                 return; // 同じ村への再送は成功として扱う。
             }
             abort_if($user->village_id !== null, 409, 'すでに別の村に所属しています。');
+
+            // 確認画面を開いた後の変更も反映し、保存完了まで地形と村の対応を保つ。
+            $village = Village::query()->with(['terrain' => fn ($query) => $query->sharedLock()])
+                ->sharedLock()->findOrFail($village->id);
+            abort_unless($village->allowsInitialMembership(), 422, 'この村は入村できません');
 
             $user->village()->associate($village);
             $user->save();

@@ -45,4 +45,22 @@ class ChatMessage extends Model
     {
         return $this->belongsTo(User::class, 'recipient_user_id');
     }
+
+    /** 履歴・送信結果・リアルタイム配信で共通の公開項目。IP/UA等の管理情報は含めない。 */
+    public function toChatPayload(): array
+    {
+        return [
+            'id' => $this->id,
+            'type' => (int) $this->getRawOriginal('type'),
+            'user_id' => $this->user_id,
+            'sender_user_name' => $this->user?->name,
+            // 新規送信はスナップショット、旧履歴のみ現在のユーザー公開IDにフォールバック。
+            'sender_user_text_id' => $this->sender_user_text_id ?? $this->user?->text_id,
+            'recipient_user_id' => $this->recipient_user_id,
+            'recipient_user_name' => $this->recipient?->name,
+            'recipient_user_text_id' => $this->recipient_user_text_id ?? $this->recipient?->text_id,
+            'message' => $this->message,
+            'created_at' => $this->created_at?->toIso8601String(),
+        ];
+    }
 }

@@ -10,8 +10,10 @@ type ChatMessage = {
     id: number;
     type: number;
     user_id: number;
+    sender_user_name: string | null;
     sender_user_text_id: string | null;
     recipient_user_id: number | null;
+    recipient_user_name: string | null;
     recipient_user_text_id: string | null;
     message: string;
     created_at: string | null;
@@ -52,9 +54,9 @@ function messageKind(type: number): ChatKind {
 
 function formatSender(kind: ChatKind, sender: string): string {
     switch (kind) {
-        case 'global': return `[${sender}]`;
-        case 'village': return `{${sender}}`;
-        case 'direct': return `@${sender}`;
+        case 'global': return `${sender}`;
+        case 'village': return `${sender}`;
+        case 'direct': return `(${sender})`;
         default: return sender;
     }
 }
@@ -302,14 +304,15 @@ export default function ChatPanel() {
 
                     const message = item.message;
                     const kind = messageKind(message.type);
-                    const sender = message.sender_user_text_id ?? `ユーザー${message.user_id}`;
+                    const sender = message.sender_user_name || `ユーザー${message.user_id}`;
                     // ウィスパーは送信者なら宛先、受信者なら送信元を表示する。
                     const isSentDirect = kind === 'direct' && message.user_id === user?.id;
                     const partner = isSentDirect
-                        ? message.recipient_user_text_id
-                            ?? (message.recipient_user_id !== null ? `ユーザー${message.recipient_user_id}` : sender)
+                        ? message.recipient_user_name
+                            || (message.recipient_user_id !== null ? `ユーザー${message.recipient_user_id}` : '不明なユーザー')
                         : sender;
                     // DMは画面に表示されている「相手」、それ以外は発言者を返信先にする。
+                    // 同名のユーザーにも正しく届くよう、入力欄の@宛先には公開IDを使う。
                     const replyTextId = isSentDirect ? message.recipient_user_text_id : message.sender_user_text_id;
                     const replyUserId = isSentDirect ? message.recipient_user_id : message.user_id;
                     // 公開ID不明の旧履歴と、自分自身への返信は操作不可（サーバーも自己DMを拒否）。
